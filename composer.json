@@ -1,0 +1,29 @@
+{
+   "name": "aaix/eloquent-translatable",
+   "description": "A clean, performant, and developer-friendly translatable trait for Laravel Eloquent models.",
+   "type": "library",
+   "license": "MIT",
+   "authors": [
+      {
+         "name": "Jonas Gnioui",
+         "email": "jonaaix@icloud.com"
+      }
+   ],
+   "require": {
+      "php": "^8.3",
+      "illuminate/support": "^10.0 || ^11.0 || ^12.0",
+      "illuminate/database": "^10.0 || ^11.0 || ^12.0"
+   },
+   "autoload": {
+      "psr-4": {
+         "Aaix\\EloquentTranslatable\\": "src/"
+      }
+   },
+   "extra": {
+      "laravel": {
+         "providers": [
+            "Aaix\\EloquentTranslatable\\EloquentTranslatableServiceProvider"
+         ]
+      }
+   }
+}
