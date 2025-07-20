@@ -51,22 +51,6 @@ trait HasTranslations
          if (array_key_exists('_translation_dirty_flag', $model->getAttributes())) {
             unset($model->attributes['_translation_dirty_flag']);
          }
-
-         // The following logic is responsible for handling a specific edge case where a developer
-         // might manually set a translatable attribute on a model that is already in a
-         // persistent locale mode. In this scenario, the `setAttribute` method won't be
-         // triggered for the initial assignment, so we need to intercept the value here,
-         // just before the model is saved.
-         if ($locale = $model->getActiveLocale()) {
-            foreach ($model->getDirty() as $key => $value) {
-               if ($model->isTranslatableColumn($key)) {
-                  $model->setTranslation($key, $locale, $value);
-                  // Revert the change on the main model object to prevent it
-                  // from being saved to the main table.
-                  $model->syncOriginalAttribute($key);
-               }
-            }
-         }
       });
 
       // Persist all staged translations after the main model has been saved.
