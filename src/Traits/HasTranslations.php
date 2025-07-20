@@ -43,8 +43,20 @@ trait HasTranslations
     */
    public static function bootHasTranslations(): void
    {
-      // Intercept assignments when a locale is active, just before the model saves.
       static::saving(static function (Model $model) {
+         // If a translation has been set using the persistent locale mode,
+         // a temporary dirty flag is added to trigger the `save` method.
+         // We must remove this flag before the model is actually saved to
+         // prevent it from being written to the database.
+         if (array_key_exists('_translation_dirty_flag', $model->getAttributes())) {
+            unset($model->attributes['_translation_dirty_flag']);
+         }
+
+         // The following logic is responsible for handling a specific edge case where a developer
+         // might manually set a translatable attribute on a model that is already in a
+         // persistent locale mode. In this scenario, the `setAttribute` method won't be
+         // triggered for the initial assignment, so we need to intercept the value here,
+         // just before the model is saved.
          if ($locale = $model->getActiveLocale()) {
             foreach ($model->getDirty() as $key => $value) {
                if ($model->isTranslatableColumn($key)) {
@@ -123,6 +135,10 @@ trait HasTranslations
    {
       if ($this->isTranslatableColumn($key) && $this->getActiveLocale()) {
          $this->setTranslation($key, $this->getActiveLocale(), $value);
+
+         // Mark the model as dirty to trigger save() using a temporary flag.
+         $this->attributes['_translation_dirty_flag'] = true;
+
          return $this;
       }
 
@@ -285,7 +301,7 @@ trait HasTranslations
          }
       }
 
-      return parent::__get($column);
+      return $this->getOriginal($column);
    }
 
    /**
