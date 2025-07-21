@@ -1,45 +1,96 @@
-## Eloquent Translatable
+<p align="center">
+  <a href="https://github.com/jonaaix/eloquent-translatable">
+    <img src="https://raw.githubusercontent.com/jonaaix/eloquent-translatable/main/docs/static/img/logo2.png" alt="Laravel Eloquent Translatable Logo" width="200">
+  </a>
+</p>
 
-A clean, performant, and developer-friendly trait for Laravel Eloquent models that require translation capabilities. This package is designed for simplicity and performance, using a dedicated translation table for each model.
+<h1 align="center">Laravel Eloquent Translatable</h1>
 
-## Features
+<p align="center">
+High performance, developer-first translations for Laravel models.
+</p>
 
-- **Clean & Simple API:** An intuitive and fluent interface.
-- **High Performance:** Uses direct database queries and avoids Eloquent overhead for translations.
-- **Flexible:** Works with or without a dedicated translation model.
-- **Secure by Default:** Requires explicit definition of translatable attributes.
-- **Convenient:** Ships with a helpful Artisan command and a comprehensive `Locale` Enum.
+<p align="center">
+  <a href="https://packagist.org/packages/aaix/eloquent-translatable"><img src="https://img.shields.io/packagist/v/aaix/eloquent-translatable.svg?style=flat-square" alt="Latest Version on Packagist"></a>
+  <a href="https://packagist.org/packages/aaix/eloquent-translatable"><img src="https://img.shields.io/packagist/dt/aaix/eloquent-translatable.svg?style=flat-square" alt="Total Downloads"></a>
+  <a href="https://github.com/jonaaix/eloquent-translatable/actions/workflows/tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/jonaaix/eloquent-translatable/tests.yml?branch=main&label=tests&style=flat-square" alt="GitHub Actions"></a>
+  <a href="https://github.com/jonaaix/eloquent-translatable/blob/main/LICENSE.md"><img src="https://img.shields.io/packagist/l/aaix/eloquent-translatable.svg?style=flat-square" alt="License"></a>
+</p>
 
-### Why another translation package?
+---
 
-Frustrated by the complexity and poor implementation of existing solutions, this package was created with a focus on performance and a clean, predictable API. It avoids unnecessary overhead and provides a straightforward developer experience.
+**Eloquent Translatable** is a Laravel package built for raw performance and a clean, focused developer experience. It uses direct, indexed database queries instead of relying on JSON columns or complex Eloquent model hydration, making it significantly faster and more memory-efficient than other solutions.
+
+## Key Features
+
+- **🚀 Performance-First:** Designed for speed at scale. No Eloquent overhead, no JSON parsing.
+- **✨ Intuitive API:** A clean, fluent, and predictable interface.
+- **🔒 Secure by Default:** Explicitly define which attributes are translatable.
+- **⚙️ Artisan Command:** Scaffold translation migrations with a single command.
+- **🛡️ Enum-Powered:** Ships with a `Locale` enum for type-safe, readable code.
+
+## Documentation
+
+For the full documentation, please visit our **[documentation website](https://jonaaix.github.io/eloquent-translatable/docs/getting-started)**.
 
 ## Installation
 
-Require the package using Composer:
+You can install the package via Composer:
 
 ```bash
 composer require aaix/eloquent-translatable
 ```
 
-## Documentation
+## Quick Example
 
-For full usage instructions, including setup, basic and advanced usage, and customization options, please see our [**full documentation**](https://your-docusaurus-site.com/docs/getting-started).
+1.  **Prepare your model:**
 
-A minimal usage example:
+    ```php
+    // app/Models/Product.php
+    namespace App\Models;
 
-```php
-use Aaix\EloquentTranslatable\Enums\Locale;
+    use Aaix\EloquentTranslatable\Traits\HasTranslations;
+    use Illuminate\Database\Eloquent\Model;
 
-$product = Product::find(1);
+    class Product extends Model
+    {
+        use HasTranslations;
 
-echo $product->name; // Outputs: "Example Product"
+        public array $translatable = ['name', 'description'];
+    }
+    ```
 
-// Set a translation
-$product->forLocale(Locale::GERMAN, function ($product) {
-   $product->name = 'Beispiel Produkt';
-});
+2.  **Store and access translations:**
 
-// Get a translation
-echo $product->getTranslated('name', Locale::GERMAN); // Outputs: "Beispiel Produkt"
+    ```php
+    use Aaix\EloquentTranslatable\Enums\Locale;
+
+    $product = Product::create(['name' => 'My awesome product']);
+
+    // Store a translation
+    $product->storeTranslation('name', Locale::GERMAN, 'Mein tolles Produkt');
+
+    // Access it (will fall back to the app's locale)
+    app()->setLocale('de');
+    echo $product->name; // Output: Mein tolles Produkt
+
+    // Or get a specific locale
+    echo $product->getTranslation('name', Locale::GERMAN); // Output: Mein tolles Produkt
+    ```
+
+## Testing
+
+To run the package's test suite, clone the repository and run:
+
+```bash
+composer install
+composer test
 ```
+
+## Contributing
+
+Contributions are welcome! Please see the [contributing guide](https://github.com/jonaaix/eloquent-translatable/blob/main/.github/CONTRIBUTING.md) for more details.
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
