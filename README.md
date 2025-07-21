@@ -31,7 +31,7 @@ High performance, developer-first translations for Laravel models.
 
 ## Documentation
 
-For the full documentation, please visit our **[documentation website](https://jonaaix.github.io/eloquent-translatable/docs/getting-started)**.
+For the full documentation, please visit our **[documentation website](https://jonaaix.github.io/eloquent-translatable)**.
 
 ## Installation
 
