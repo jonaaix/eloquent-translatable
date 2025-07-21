@@ -17,18 +17,27 @@ jobs:
                -  laravel: '10.*'
                   php: '8.2'
                   testbench: '8.*'
+                  phpunit: '10.*'
 
                # Test Laravel 11
                -  laravel: '11.*'
                   php: '8.2'
                   testbench: '9.*'
+                  phpunit: '11.*'
 
                # Test Laravel 12
                -  laravel: '12.*'
                   php: '8.3'
                   testbench: '10.*'
+                  phpunit: '12.*'
 
-      name: L${{ matrix.laravel }} - P${{ matrix.php }}
+               # Test Laravel 12 on PHP 8.4
+               -  laravel: '12.*'
+                  php: '8.4'
+                  testbench: '10.*'
+                  phpunit: '12.*'
+
+      name: P${{ matrix.php }} - L${{ matrix.laravel }}
 
       steps:
          -  name: Checkout code
@@ -41,10 +50,13 @@ jobs:
                extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
                coverage: none
 
-         -  name: Install dependencies
+         -  name: Install Composer dependencies
             run: |
-               composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/console:${{ matrix.laravel }}" "illuminate/filesystem:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
-               composer update --prefer-dist --no-interaction
+               composer require "laravel/framework:${{ matrix.laravel }}" \
+                 "orchestra/testbench:${{ matrix.testbench }}" \
+                 "phpunit/phpunit:${{ matrix.phpunit }}" \
+                 --no-interaction --no-update --dev
+               composer update --prefer-stable --prefer-dist --no-interaction --no-progress --with-all-dependencies
 
-         -  name: Run tests
+         -  name: Execute tests
             run: vendor/bin/pest
