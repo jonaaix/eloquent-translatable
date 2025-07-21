@@ -89,8 +89,8 @@ composer test
 
 ## Contributing
 
-Contributions are welcome! Please see the [contributing guide](https://github.com/jonaaix/eloquent-translatable/blob/main/.github/CONTRIBUTING.md) for more details.
+Contributions are welcome!
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
