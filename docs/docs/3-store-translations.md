@@ -7,7 +7,7 @@ sidebar_position: 3
 This section covers all methods for writing translations. The package makes a clear distinction between **staging** a
 translation (which requires a `save()` call) and **storing** it instantly.
 
-## Setting Base Attributes
+## 1. Setting Base Attributes
 
 This package is designed to be predictable. Direct property assignment always affects the main model attribute, never a
 translation. The application's locale has no effect on write operations.
@@ -27,7 +27,7 @@ $product->save();
 
 To add a translation, you must use one of the explicit `setTranslation()` or `storeTranslation()` methods.
 
-## Staging Translations (`set...`)
+## 2. Staging Translations (`set...`)
 
 The `set...` methods **stage** a translation. They are only persisted to the database when you call `$model->save()`. This is
 useful for grouping multiple changes in a single database transaction.
@@ -55,7 +55,7 @@ $product->setTranslations('name', [
 $product->save();
 ```
 
-## Storing Translations Instantly (`store...`)
+## 3. Storing Translations Instantly (`store...`)
 
 The `store...` methods write translations **directly and instantly** to the database. They require the model to exist and will
 throw an exception otherwise.
@@ -77,7 +77,7 @@ $product->storeTranslations('description', [
 ]);
 ```
 
-## Using the Persistent Locale (Translation Mode)
+## 4. Translation Mode (Stateful)
 
 For situations where you need to perform multiple read and write operations in a specific language, you can use `setLocale()` to activate a persistent **"translation mode"** for that model instance.
 

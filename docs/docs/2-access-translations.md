@@ -30,6 +30,21 @@ $product = Product::find(1);
 echo $product->name;
 ```
 
+If no suitable translation is found in any of the configured locales, the package will safely return the original attribute from the model's database column.
+
+```php
+// Assuming:
+// - The product's base name is 'Base Product Name'
+// - No German translation exists
+// - The config fallback is not set or its translation doesn't exist
+
+App::setLocale('de');
+$product = Product::find(1);
+
+// Outputs: 'Base Product Name'
+echo $product->name;
+```
+
 If you explicitly need to access the original attribute without any translation, you can use Laravel's `getOriginal()` method:
 
 ```php
@@ -62,7 +77,7 @@ use Aaix\EloquentTranslatable\Enums\Locale;
 echo $product->inLocale(Locale::ENGLISH)->name;
 ```
 
-## 3. Persistent Locale Mode (Stateful)
+## 3. Translation Mode (Stateful)
 
 For situations where you need to perform multiple read and write operations in a specific language, you can set a **persistent locale** for that instance using `setLocale()`.
 

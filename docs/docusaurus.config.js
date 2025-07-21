@@ -8,6 +8,8 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const isDeploy = process.env.NODE_ENV === 'production';
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
    title: 'Laravel Eloquent Translatable',
@@ -20,15 +22,15 @@ const config = {
    },
 
    // Set the production url of your site here
-   url: 'https://your-docusaurus-site.example.com',
+   url: 'https://jonaaix.github.io',
    // Set the /<baseUrl>/ pathname under which your site is served
    // For GitHub pages deployment, it is often '/<projectName>/'
-   baseUrl: '/',
+   baseUrl: isDeploy ? '/eloquent-translatable/' : '/',
 
    // GitHub pages deployment config.
    // If you aren't using GitHub pages, you don't need these.
-   organizationName: 'facebook', // Usually your GitHub org/user name.
-   projectName: 'docusaurus', // Usually your repo name.
+   organizationName: 'jonaaix', // Usually your GitHub org/user name.
+   projectName: 'eloquent-translatable', // Usually your repo name.
 
    onBrokenLinks: 'throw',
    onBrokenMarkdownLinks: 'warn',
@@ -80,6 +82,10 @@ const config = {
       ({
          // Replace with your project's social card
          image: 'img/docusaurus-social-card.jpg',
+         colorMode: {
+            disableSwitch: false,
+            respectPrefersColorScheme: true,
+         },
          navbar: {
             title: 'Laravel Eloquent Translatable',
             logo: {
@@ -148,7 +154,7 @@ const config = {
          },
          prism: {
             theme: prismThemes.github,
-            darkTheme: prismThemes.dracula,
+            darkTheme: prismThemes.palenight,
             additionalLanguages: ['php', 'bash', 'json'],
          },
       }),

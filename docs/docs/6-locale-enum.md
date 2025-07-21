@@ -122,5 +122,4 @@ enum Locale: string
    case VIETNAMESE = 'vi';
    case WELSH = 'cy';
 }
-``;
 ```

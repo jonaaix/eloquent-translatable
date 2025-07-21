@@ -6,7 +6,7 @@ sidebar_position: 4
 
 The `deleteTranslations()` method provides a flexible way to remove translations from the database.
 
-## Deleting a Single Locale's Translations
+## 1. Deleting a Single Locale's Translations
 
 To remove all translations for a specific language, pass the locale to the method.
 
@@ -17,7 +17,7 @@ use Aaix\EloquentTranslatable\Enums\Locale;
 $product->deleteTranslations(Locale::GERMAN);
 ```
 
-## Deleting Multiple Locales' Translations
+## 2. Deleting Multiple Locales' Translations
 
 You can pass an array of locales to remove translations for multiple languages at once.
 
@@ -28,7 +28,7 @@ use Aaix\EloquentTranslatable\Enums\Locale;
 $product->deleteTranslations([Locale::ENGLISH, 'fr']);
 ```
 
-## Deleting All Translations
+## 3. Deleting All Translations
 
 If you call the method with no arguments, it will delete **all** translations associated with that model instance across all locales.
 

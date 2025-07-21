@@ -37,3 +37,14 @@ protected ?string $translationTable = 'my_product_translations';
 // The name of the foreign key in the translations table.
 protected ?string $translationForeignKey = 'my_product_id';
 ```
+
+## Custom Translation Model
+
+If you are using the optional [Eloquent Relationship](./93-eloquent-relationship.md), you can specify the fully qualified class name (FQCN) of your translation model. This is useful if your model does not follow the standard `YourModelTranslation` naming convention.
+
+```php
+// In your model
+
+// The FQCN of the translation model.
+protected ?string $translationModel = \App\Models\Translations\ProductTranslationCustom::class;
+```
