@@ -17,19 +17,16 @@ jobs:
                -  laravel: '10.*'
                   php: '8.2'
                   testbench: '8.*'
-                  phpunit: '10.*'
 
                # Test Laravel 11
                -  laravel: '11.*'
                   php: '8.2'
                   testbench: '9.*'
-                  phpunit: '11.*'
 
                # Test Laravel 12
                -  laravel: '12.*'
                   php: '8.3'
                   testbench: '10.*'
-                  phpunit: '12.*'
 
       name: L${{ matrix.laravel }} - P${{ matrix.php }}
 
@@ -46,7 +43,7 @@ jobs:
 
          -  name: Install dependencies
             run: |
-               composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/console:${{ matrix.laravel }}" "illuminate/filesystem:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "phpunit/phpunit:${{ matrix.phpunit }}" --no-interaction --no-update
+               composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/console:${{ matrix.laravel }}" "illuminate/filesystem:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
                composer update --prefer-dist --no-interaction
 
          -  name: Run tests
