@@ -25,6 +25,7 @@ High performance, developer-first translations for Laravel models.
 
 - **🚀 Performance-First:** Designed for speed at scale. No Eloquent overhead, no JSON parsing.
 - **✨ Intuitive API:** A clean, fluent, and predictable interface.
+- **🤝 Spatie-Compatible:** Optional API compatibility with `spatie/laravel-translatable`.
 - **🔒 Secure by Default:** Explicitly define which attributes are translatable.
 - **⚙️ Artisan Command:** Scaffold translation migrations with a single command.
 - **🛡️ Enum-Powered:** Ships with a `Locale` enum for type-safe, readable code.
