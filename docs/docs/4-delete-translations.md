@@ -24,8 +24,8 @@ You can pass an array of locales to remove translations for multiple languages a
 ```php
 use Aaix\EloquentTranslatable\Enums\Locale;
 
-// Deletes all English and French translations for this product.
-$product->deleteTranslations([Locale::ENGLISH, 'fr']);
+// Deletes all Dutch and French translations for this product.
+$product->deleteTranslations([Locale::DUTCH, 'fr']);
 ```
 
 ## 3. Deleting All Translations

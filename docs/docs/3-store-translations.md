@@ -7,30 +7,10 @@ sidebar_position: 3
 This section covers all methods for writing translations. The package makes a clear distinction between **staging** a
 translation (which requires a `save()` call) and **storing** it instantly.
 
-## 1. Setting Base Attributes
-
-This package is designed to be predictable. Direct property assignment always affects the main model attribute, never a
-translation. The application's locale has no effect on write operations.
-
-You can create and update your models as you always have:
-
-```php
-// App::setLocale('de'); does NOT affect storing translations.
-
-$product = new Product();
-$product->name = 'My Base Product Name';
-$product->save();
-
-// Result: A new product is created with its base attributes.
-// No translations have been created.
-```
-
-To add a translation, you must use one of the explicit `setTranslation()` or `storeTranslation()` methods.
-
-## 2. Staging Translations (`set...`)
+## 1. Staging Translations (`set...`)
 
 The `set...` methods **stage** a translation. They are only persisted to the database when you call `$model->save()`. This is
-useful for grouping multiple changes in a single database transaction.
+the recommended approach for grouping multiple changes in a single database transaction.
 
 ### Staging a Single Translation
 
@@ -48,14 +28,14 @@ $product->save();
 ```php
 $product->setTranslations('name', [
    Locale::GERMAN => 'Deutscher Name',
-   Locale::ENGLISH => 'English Name',
+   Locale::DUTCH => 'Nederlandse Naam',
 ]);
 
 // Persist all staged translations.
 $product->save();
 ```
 
-## 3. Storing Translations Instantly (`store...`)
+## 2. Storing Translations Instantly (`store...`)
 
 The `store...` methods write translations **directly and instantly** to the database. They require the model to exist and will
 throw an exception otherwise.
@@ -64,7 +44,7 @@ throw an exception otherwise.
 
 ```php
 // This writes directly to the database. No save() call is needed.
-$product->storeTranslation('description', Locale::SPANISH, 'Una descripción en español');
+$product->storeTranslation('description', Locale::FRENCH, 'Une description en français');
 ```
 
 ### Storing Multiple Translations
@@ -72,21 +52,16 @@ $product->storeTranslation('description', Locale::SPANISH, 'Una descripción en 
 ```php
 // Each translation is written to the database instantly.
 $product->storeTranslations('description', [
-   Locale::SPANISH => 'Una descripción en español',
-   Locale::ITALIAN => 'Una descrizione in italiano',
+   Locale::FRENCH => 'Une description en français',
+   Locale::DUTCH => 'Een Nederlandse omschrijving',
 ]);
 ```
 
-## 4. Translation Mode (Stateful)
+## 3. Translation Mode (Stateful)
 
 For situations where you need to perform multiple read and write operations in a specific language, you can use `setLocale()` to activate a persistent **"translation mode"** for that model instance.
 
-Once this mode is active:
-
-- **Writing:** Direct assignments (`$product->name = '...'`) will now be staged as translations for the set locale.
-- **Reading:** Direct access (`$product->name`) will now read from the set locale.
-
-**Important:** This mode remains active until you explicitly disable it. Always call `resetLocale()` when you are finished to prevent unintended side effects in other parts of your code.
+Once this mode is active, direct assignments (`$product->name = '...'`) will be staged as translations for the set locale.
 
 ```php
 use Aaix\EloquentTranslatable\Enums\Locale;
@@ -96,13 +71,78 @@ $product->setLocale(Locale::GERMAN);
 
 // This assignment is now STAGED as a German translation
 $product->name = 'Ein deutscher Name';
-$product->description = 'Eine deutsche Beschreibung';
-$product->keywords = 'deutsch, Produkt, Beispiel';
 $product->save(); // Persists the German translation
-
-// This will now also read the German translation
-echo $product->name; // Outputs: 'Ein deutscher Name'
 
 // Always reset the mode when finished
 $product->resetLocale();
+```
+
+---
+
+## 4. Mass-Assignment (Spatie-Compatible API)
+
+As a convenient alternative, you can assign a multi-locale array directly to a translatable attribute. This stages all translations and is compatible with the API of [`spatie/laravel-translatable`](https://github.com/spatie/laravel-translatable).
+
+```php
+$product = new Product();
+
+// Assign a multi-locale array to the 'name' attribute
+$product->name = [
+   'de' => 'Mein tolles Produkt',
+   'nl' => 'Mijn geweldige product',
+];
+
+// The translations are staged and saved in a single operation.
+$product->save();
+```
+
+## 5. Storing JSON Translations
+
+For attributes that store structured data, you can configure them to be handled as translatable JSON objects.
+
+### Configuration
+
+To enable this behavior for an attribute (e.g., `options`), you must do three things in your model:
+
+1.  Add the attribute to the main `$translatable` array.
+2.  Add the attribute name to the `$allowJsonTranslationsFor` array.
+3.  Cast the attribute to `array` or `json` in the `$casts` property.
+
+**Note:** When an attribute is listed in `$allowJsonTranslationsFor`, the default multi-locale array assignment (Spatie-compatible API) is disabled for it. Assigning an array will always be treated as a single JSON translation.
+
+```php
+// In your model
+class Product extends Model
+{
+    use HasTranslations;
+
+    // 1. The attribute must be declared as translatable.
+    public array $translatable = ['name', 'options'];
+
+    // 2. Define the attribute as a JSON translation target.
+    public array $allowJsonTranslationsFor = ['options'];
+
+    // 3. Cast the attribute to automatically handle encoding/decoding.
+    protected $casts = [
+        'options' => 'array',
+    ];
+}
+```
+
+### Usage
+
+To store a JSON translation, use the explicit `setTranslation()` method. If the attribute is configured for JSON translations, you can pass a PHP array directly—the package will automatically handle the JSON encoding.
+
+This is the recommended approach as it is stateless, explicit, and avoids any unintended side effects.
+
+```php
+use Aaix\EloquentTranslatable\Enums\Locale;
+
+// The keys ('color', 'size') remain the same across translations.
+$options = ['color' => 'blau', 'size' => 'groß'];
+
+// The package automatically encodes the array to JSON.
+$product->setTranslation('options', Locale::GERMAN, $options);
+
+$product->save(); // Persists the German translation
 ```

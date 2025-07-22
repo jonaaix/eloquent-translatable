@@ -28,6 +28,9 @@ trait HasTranslations
      // To allow all attributes, use `['*']`.
      public array $translatable = [];
 
+     // Optional: Defines attributes that should be treated as single JSON-encoded translations.
+     public array $allowJsonTranslationsFor = [];
+
      // Optional: The FQCN of the translation model for the Eloquent relationship.
      protected ?string $translationModel = null;
 
@@ -84,18 +87,24 @@ trait HasTranslations
     * Get a translated attribute based on the persistent or application locale.
     */
    public function __get($key)
-   {
+    {
       // First, check if the attribute is even meant to be translatable.
       // If not, do not interfere and let Eloquent handle it normally.
       // This is crucial for relationships (like ->variations) to work correctly.
-      if (!$this->isTranslatableColumn($key)) {
-         return parent::__get($key);
-      }
+        if (! $this->isTranslatableColumn($key)) {
+            return parent::__get($key);
+        }
 
-      // Only if the attribute is in the $translatable array,
-      // proceed with our translation logic.
-      return $this->resolveTranslatedValue($key, $this->getActiveLocale());
-   }
+        $value = $this->resolveTranslatedValue($key, $this->getActiveLocale());
+
+        if ($this->isJsonTranslation($key)) {
+            if (is_string($value) && ($json = json_decode($value, true)) !== null) {
+                return $json;
+            }
+        }
+
+        return $value;
+    }
 
    /**
     * Check if a translated attribute is set.
@@ -115,19 +124,41 @@ trait HasTranslations
    /**
     * Override the default setAttribute method to handle assignments when a persistent locale is active.
     */
-   public function setAttribute($key, $value)
-   {
-      if ($this->isTranslatableColumn($key) && $this->getActiveLocale()) {
-         $this->setTranslation($key, $this->getActiveLocale(), $value);
+    public function setAttribute($key, $value)
+    {
+        if (!$this->isTranslatableColumn($key)) {
+            return parent::setAttribute($key, $value);
+        }
 
-         // Mark the model as dirty to trigger save() using a temporary flag.
-         $this->attributes['_translation_dirty_flag'] = true;
+        // Handle multi-locale array assignment (Spatie-compatible), but ignore for JSON attributes.
+        if (is_array($value) && !$this->isJsonTranslation($key)) {
+            $this->setTranslations($key, $value);
 
-         return $this;
-      }
+            // Mark the model as dirty to trigger save() using a temporary flag.
+            $this->attributes['_translation_dirty_flag'] = true;
 
-      return parent::setAttribute($key, $value);
-   }
+            return $this;
+        }
+
+        // If a persistent locale is active ("translation mode"), handle assignments as translations.
+        if ($this->getActiveLocale()) {
+            $valueToStore = $this->isJsonTranslation($key) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
+            $this->setTranslation($key, $this->getActiveLocale(), $valueToStore);
+            $this->attributes['_translation_dirty_flag'] = true;
+
+            // For JSON attributes, also set the value on the parent model. This allows immediate
+            // access to the casted array value even before the model is saved.
+            if ($this->isJsonTranslation($key)) {
+                return parent::setAttribute($key, $value);
+            }
+
+            return $this;
+        }
+
+        // Fallback to default Eloquent behavior. This handles setting the base attribute
+        // or a JSON attribute when not in translation mode.
+        return parent::setAttribute($key, $value);
+    }
 
    /**
     * Sets a persistent locale for both read and write operations on this instance.
@@ -182,15 +213,21 @@ trait HasTranslations
    /**
     * Stages a single translation to be saved on the next `save()` call.
     */
-   public function setTranslation(string $key, string|Locale $locale, ?string $value): static
+   public function setTranslation(string $key, string|Locale $locale, mixed $value): static
    {
       if (!$this->isTranslatableColumn($key)) {
          throw AttributeIsNotTranslatable::make($key, $this);
       }
 
+      $valueToStore = $this->isJsonTranslation($key) && is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
+
+      if (!is_string($valueToStore) && $valueToStore !== null) {
+          throw new \InvalidArgumentException("Translation value for key '{$key}' must be a string, or an array for JSON-castable attributes.");
+      }
+
       $localeValue = $locale instanceof Locale ? $locale->value : $locale;
-      $this->stagedTranslations[$localeValue][$key] = $value;
-      $this->updateLoadedTranslation($key, $localeValue, $value);
+      $this->stagedTranslations[$localeValue][$key] = $valueToStore;
+      $this->updateLoadedTranslation($key, $localeValue, $valueToStore);
 
       return $this;
    }
@@ -295,6 +332,16 @@ trait HasTranslations
    {
       return $this->activeLocale;
    }
+
+   /**
+    * Checks if a given key is defined as a JSON translation.
+    * This is used to determine how to handle the value when setting or getting translations.
+    */
+   protected function isJsonTranslation(string $key): bool
+    {
+        return property_exists($this, 'allowJsonTranslationsFor')
+            && in_array($key, $this->allowJsonTranslationsFor, true);
+    }
 
    /**
     * Determines if a given column is defined as translatable.

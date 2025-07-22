@@ -18,7 +18,7 @@ use Aaix\EloquentTranslatable\Enums\Locale;
 $product->setLocale(Locale::JAPANESE);
 
 // Get a specific translation
-$name = $product->translate('name', Locale::SPANISH);
+$name = $product->getTranslation('name', Locale::SPANISH);
 
 // Stage a translation for saving
 $product->setTranslation('name', Locale::FRENCH, 'Nouveau Produit');
@@ -26,11 +26,11 @@ $product->setTranslation('name', Locale::FRENCH, 'Nouveau Produit');
 
 ## Creating a Custom Enum
 
-If the provided `Locale` enum is not sufficient for your needs (e.g., you require regional locales like `en-US`), you can easily create your own.
+If the provided `Locale` enum is not sufficient for your needs (e.g., you require regional locales like `de-AT`), you can easily create your own.
 
 Your custom enum must be a **string-backed enum**. When using it with this package's methods, you can simply pass the enum case directly, as the methods also accept raw strings.
 
-Here is an example of a custom enum for regional English locales:
+Here is an example of a custom enum for regional German locales:
 
 **`app/Enums/RegionalLocale.php`**
 
@@ -41,9 +41,9 @@ namespace App\Enums;
 
 enum RegionalLocale: string
 {
-   case US_ENGLISH = 'en-US';
-   case BRITISH_ENGLISH = 'en-GB';
-   case AUSTRALIAN_ENGLISH = 'en-AU';
+   case GERMANY = 'de-DE';
+   case AUSTRIA = 'de-AT';
+   case SWITZERLAND = 'de-CH';
 }
 ```
 
@@ -52,8 +52,8 @@ You can then use it in your application like this:
 ```php
 use App\Enums\RegionalLocale;
 
-// The package methods will correctly use the string value 'en-GB'.
-$product->setTranslation('name', RegionalLocale::BRITISH_ENGLISH, 'A British Name');
+// The package methods will correctly use the string value 'de-AT'.
+$product->setTranslation('name', RegionalLocale::AUSTRIA, 'Ein österreichischer Name');
 ```
 
 ## Available Locales

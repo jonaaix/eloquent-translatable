@@ -46,7 +46,7 @@ $products = Product::with('translations')->get();
 
 foreach ($products as $product) {
    // The translations are already loaded and won't cause extra queries
-   $englishName = $product->translate('name', 'en');
+   $dutchName = $product->getTranslation('name', 'nl');
 }
 
 // You can also query the relationship directly

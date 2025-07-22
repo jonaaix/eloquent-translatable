@@ -15,6 +15,12 @@ For security and clarity, you must define which model attributes are translatabl
 public array $translatable = ['name', 'description'];
 ```
 
+For special cases, you can also configure attributes to be handled as [translatable JSON objects](./2-access-translations.md#4-accessing-json-translations). For example, by defining the following property in your model:
+
+```php
+public array $allowJsonTranslationsFor = ['options'];
+```
+
 ### Allow All Attributes
 
 If you need to make all attributes of a model translatable, you can do so by using a wildcard `*` in the `$translatable` array.
