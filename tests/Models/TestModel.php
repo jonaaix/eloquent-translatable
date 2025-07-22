@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class TestModel extends Model
 {
-    use HasTranslations;
+   use HasTranslations;
 
-    public array $translatable = ['name'];
-    protected $guarded = [];
+   public array $translatable = ['name'];
+   protected $guarded = [];
 }
