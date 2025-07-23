@@ -22,19 +22,28 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
    protected function getEnvironmentSetUp($app): void
    {
-      $app['config']->set('database.default', 'mysql');
-      $app['config']->set('database.connections.mysql', [
-         'driver' => 'mysql',
-         'host' => '127.0.0.1',
-         'port' => '3307',
-         'database' => 'eloquent_translatable_test',
-         'username' => 'root',
-         'password' => 'password',
-         'charset' => 'utf8mb4',
-         'collation' => 'utf8mb4_unicode_ci',
-         'prefix' => '',
-         'strict' => true,
-         'engine' => null,
+      $app['config']->set('database.default', 'sqlite');
+      $app['config']->set('database.connections.sqlite', [
+         'driver'   => 'sqlite',
+         'database' => ':memory:',
+         'prefix'   => '',
       ]);
+
+      if (getenv('DB_CONNECTION') === 'mysql') {
+         $app['config']->set('database.default', 'mysql');
+         $app['config']->set('database.connections.mysql', [
+            'driver'    => 'mysql',
+            'host'      => '127.0.0.1',
+            'port'      => '3307',
+            'database'  => 'eloquent_translatable_test',
+            'username'  => 'root',
+            'password'  => 'password',
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix'    => '',
+            'strict'    => true,
+            'engine'    => null,
+         ]);
+      }
    }
 }
