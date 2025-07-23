@@ -3,13 +3,14 @@ import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
 const FeatureList = [
+
    {
-      title: 'Performance-First',
-      img: require('@site/static/img/performance.png').default,
+      title: 'Developer-First Experience',
+      img: require('@site/static/img/developer.png').default,
       description: (
          <>
-            Built for speed and scalability. By intentionally bypassing Eloquent's overhead for direct database queries, this
-            package delivers lightning-fast performance with minimal memory usage, even when handling millions of translations.
+            Get productive in seconds. Scaffold your migration files with a single Artisan command, and write safer, more readable
+            code with the built-in Locale enum that prevents typos and improves clarity.
          </>
       ),
    },
@@ -24,12 +25,12 @@ const FeatureList = [
       ),
    },
    {
-      title: 'Developer-First Experience',
-      img: require('@site/static/img/developer.png').default,
+      title: 'Performant & Scalable',
+      img: require('@site/static/img/performance.png').default,
       description: (
          <>
-            Get productive in seconds. Scaffold your migration files with a single Artisan command, and write safer, more readable
-            code with the built-in Locale enum that prevents typos and improves clarity.
+            Built for speed and scalability. By intentionally bypassing Eloquent's overhead for direct database queries, this
+            package delivers lightning-fast performance with minimal memory usage, even when handling millions of translations.
          </>
       ),
    },
