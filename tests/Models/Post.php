@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Post extends Model
 {
-    use HasTranslations;
+   use HasTranslations;
 
-    public array $translatable = ['title', 'content'];
+   public array $translatable = ['title', 'content'];
 
-    protected $guarded = [];
+   protected $guarded = [];
 
-    public function comments(): HasMany
-    {
-        return $this->hasMany(Comment::class);
-    }
+   public function comments(): HasMany
+   {
+      return $this->hasMany(Comment::class);
+   }
 }

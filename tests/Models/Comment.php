@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Comment extends Model
 {
-    use HasTranslations;
+   use HasTranslations;
 
-    public array $translatable = ['text'];
+   public array $translatable = ['text'];
 
-    protected $guarded = [];
+   protected $guarded = [];
 
-    public function post(): BelongsTo
-    {
-        return $this->belongsTo(Post::class);
-    }
+   public function post(): BelongsTo
+   {
+      return $this->belongsTo(Post::class);
+   }
 }
