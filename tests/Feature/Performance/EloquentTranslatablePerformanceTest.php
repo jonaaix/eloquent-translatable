@@ -90,7 +90,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function eagerLoadProducts(int $count): void
    {
-      $products = EloquentProduct::limit($count)->get();
+      $products = EloquentProduct::limit($count)->getWithTranslations();
       foreach ($products as $product) {
          $this->assertNotNull($product->getTranslation('name', 'de'));
       }

@@ -12,7 +12,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
       parent::setUp();
 
       // This now only loads the general-purpose migrations like `create_test_tables.php`.
-      $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+      $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
    }
 
    protected function getPackageProviders($app): array

@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class EloquentProductTranslation extends Model
 {
-    public $timestamps = false;
+   public $timestamps = false;
 
-    protected $table = 'aaix_product_translations';
+   protected $table = 'aaix_product_translations';
 
-    protected $guarded = [];
+   protected $guarded = [];
 }

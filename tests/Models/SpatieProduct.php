@@ -7,11 +7,11 @@ use Spatie\Translatable\HasTranslations;
 
 class SpatieProduct extends Model
 {
-    use HasTranslations;
+   use HasTranslations;
 
-    protected $table = 'spatie_products';
+   protected $table = 'spatie_products';
 
-    protected $guarded = [];
+   protected $guarded = [];
 
-    public array $translatable = ['name', 'description'];
+   public array $translatable = ['name', 'description'];
 }

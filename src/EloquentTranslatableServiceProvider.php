@@ -24,5 +24,19 @@ class EloquentTranslatableServiceProvider extends ServiceProvider
 
          $this->commands([MakeTranslationTableCommand::class]);
       }
+
+      \Illuminate\Database\Eloquent\Builder::macro('getWithTranslations', function ($columns = ['*']) {
+         /** @var \Illuminate\Database\Eloquent\Builder $this */
+         $collection = $this->get($columns);
+
+         if ($collection->isNotEmpty()) {
+            $modelClass = get_class($collection->first());
+            if (in_array(\Aaix\EloquentTranslatable\Traits\HasTranslations::class, class_uses_recursive($modelClass))) {
+               $modelClass::loadTranslationsForCollection($collection);
+            }
+         }
+
+         return $collection;
+      });
    }
 }

@@ -12,8 +12,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 abstract class BasePerformanceTest extends TestCase
 {
-   protected int $productCount = 10000;
-   protected int $chunkSize = 500;
+   protected int $productCount = 100000;
+   protected int $chunkSize = 100;
    protected array $locales = ['en', 'de', 'fr', 'es', 'nl'];
    protected OutputStyle $output;
 
@@ -22,7 +22,7 @@ abstract class BasePerformanceTest extends TestCase
    public function setUp(): void
    {
       parent::setUp();
-      $this->loadMigrationsFrom(__DIR__.'/../../database/migrations/performance');
+      $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations/performance');
    }
 
    public function __construct(?string $name = null, array $data = [], $dataName = '')
@@ -68,7 +68,9 @@ abstract class BasePerformanceTest extends TestCase
             $this->pruneChunk($chunkCount);
          }
       } else {
-         $this->output->writeln("<info>[{$this->getDriverName()}] Database is already at the correct size ({$targetCount} records).</info>");
+         $this->output->writeln(
+            "<info>[{$this->getDriverName()}] Database is already at the correct size ({$targetCount} records).</info>",
+         );
       }
       DB::enableQueryLog();
    }
@@ -129,7 +131,7 @@ abstract class BasePerformanceTest extends TestCase
       $driver = str_pad($this->getDriverName(), 30);
       $testName = str_pad($name, 30);
       $durationStr = str_pad(round($duration, 2) . ' ms', 15);
-      $memoryStr = round($memoryUsage, 2) . " KB";
+      $memoryStr = round($memoryUsage, 2) . ' KB';
       $baselineDriver = 'aaix/eloquent-translatable';
 
       if ($this->getDriverName() === $baselineDriver) {
@@ -144,13 +146,13 @@ abstract class BasePerformanceTest extends TestCase
          if ($baseline['duration'] > 0.01) {
             $durationDiff = (($duration - $baseline['duration']) / $baseline['duration']) * 100;
             $durationColor = $durationDiff <= 0 ? 'info' : 'error';
-            $durationStr .= str_pad(sprintf("<%s> (%+.1f%%)</%s>", $durationColor, $durationDiff, $durationColor), 22);
+            $durationStr .= str_pad(sprintf('<%s> (%+.1f%%)</%s>', $durationColor, $durationDiff, $durationColor), 22);
          }
 
          if ($baseline['memory'] > 0.01) {
             $memoryDiff = (($memoryUsage - $baseline['memory']) / $baseline['memory']) * 100;
             $memoryColor = $memoryDiff <= 0 ? 'info' : 'error';
-            $memoryStr .= sprintf(" <%s>(%+.1f%%)</%s>", $memoryColor, $memoryDiff, $memoryColor);
+            $memoryStr .= sprintf(' <%s>(%+.1f%%)</%s>', $memoryColor, $memoryDiff, $memoryColor);
          }
       }
 
