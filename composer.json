@@ -51,7 +51,8 @@
    },
    "scripts": {
       "test": "vendor/bin/pest --testsuite=\"Unit Feature Tests\"",
-      "test-coverage": "vendor/bin/pest --coverage --testsuite=\"Unit &amp; Feature Tests\""
+      "test-coverage": "vendor/bin/pest --coverage --testsuite=\"Unit &amp; Feature Tests\"",
+      "test-workflow": "act -j test"
    },
    "config": {
       "sort-packages": true,
