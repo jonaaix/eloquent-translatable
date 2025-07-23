@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('column_name');
             $table->text('translation');
 
-            $table->unique(['{{ FOREIGN_KEY }}', 'locale', 'column_name']);
+            $table->unique(['{{ FOREIGN_KEY }}', 'locale', 'column_name'], '{{ TRANSLATIONS_TABLE_NAME }}_unique');
         });
     }
 

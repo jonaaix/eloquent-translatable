@@ -3,28 +3,38 @@
 namespace Aaix\EloquentTranslatable\Tests;
 
 use Aaix\EloquentTranslatable\EloquentTranslatableServiceProvider;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Astrotomic\Translatable\TranslatableServiceProvider;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
-   use RefreshDatabase;
+   protected function setUp(): void
+   {
+      parent::setUp();
+
+      // This now only loads the general-purpose migrations like `create_test_tables.php`.
+      $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+   }
 
    protected function getPackageProviders($app): array
    {
-      return [EloquentTranslatableServiceProvider::class];
+      return [EloquentTranslatableServiceProvider::class, TranslatableServiceProvider::class];
    }
 
    protected function getEnvironmentSetUp($app): void
    {
-      $app['config']->set('database.default', 'testing');
-      $app['config']->set('database.connections.testing', [
-         'driver' => 'sqlite',
-         'database' => ':memory:',
+      $app['config']->set('database.default', 'mysql');
+      $app['config']->set('database.connections.mysql', [
+         'driver' => 'mysql',
+         'host' => '127.0.0.1',
+         'port' => '3307',
+         'database' => 'eloquent_translatable_test',
+         'username' => 'root',
+         'password' => 'password',
+         'charset' => 'utf8mb4',
+         'collation' => 'utf8mb4_unicode_ci',
          'prefix' => '',
+         'strict' => true,
+         'engine' => null,
       ]);
-
-      // Manually run the migrations
-      $migration = include __DIR__ . '/database/migrations/create_test_tables.php';
-      $migration->up();
    }
 }

@@ -1,69 +1,71 @@
 {
-    "name": "aaix/eloquent-translatable",
-    "description": "High performance translations for Laravel models.",
-    "keywords": [
-        "laravel",
-        "eloquent",
-        "translation",
-        "translatable",
-        "localization",
-        "i18n",
-        "performance"
-    ],
-    "homepage": "https://github.com/jonaaix/eloquent-translatable",
-    "license": "MIT",
-    "type": "library",
-    "authors": [
-        {
-            "name": "Jonas",
-            "email": "jonaaix@icloud.com",
-            "role": "Developer"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/jonaaix/eloquent-translatable/issues",
-        "source": "https://github.com/jonaaix/eloquent-translatable"
-    },
-    "require": {
-        "php": "^8.1",
-        "illuminate/console": ">=10.0.0",
-        "illuminate/contracts": ">=10.0.0",
-        "illuminate/database": ">=10.0.0",
-        "illuminate/filesystem": ">=10.0.0",
-        "illuminate/support": ">=10.0.0"
-    },
-    "require-dev": {
-        "orchestra/testbench": "^8.0|^9.0",
-        "pestphp/pest": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Aaix\\EloquentTranslatable\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Aaix\\EloquentTranslatable\\Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Aaix\\EloquentTranslatable\\EloquentTranslatableServiceProvider"
-            ]
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+   "name": "aaix/eloquent-translatable",
+   "description": "High performance translations for Laravel models.",
+   "keywords": [
+      "laravel",
+      "eloquent",
+      "translation",
+      "translatable",
+      "localization",
+      "i18n",
+      "performance"
+   ],
+   "homepage": "https://github.com/jonaaix/eloquent-translatable",
+   "license": "MIT",
+   "type": "library",
+   "authors": [
+      {
+         "name": "Jonas",
+         "email": "jonaaix@icloud.com",
+         "role": "Developer"
+      }
+   ],
+   "support": {
+      "issues": "https://github.com/jonaaix/eloquent-translatable/issues",
+      "source": "https://github.com/jonaaix/eloquent-translatable"
+   },
+   "require": {
+      "php": "^8.1",
+      "illuminate/console": ">=10.0.0",
+      "illuminate/contracts": ">=10.0.0",
+      "illuminate/database": ">=10.0.0",
+      "illuminate/filesystem": ">=10.0.0",
+      "illuminate/support": ">=10.0.0"
+   },
+   "require-dev": {
+      "astrotomic/laravel-translatable": "^11.16",
+      "orchestra/testbench": "^8.0|^9.0",
+      "pestphp/pest": "^3.0",
+      "pestphp/pest-plugin-laravel": "^3.0",
+      "spatie/laravel-translatable": "^6.11"
+   },
+   "autoload": {
+      "psr-4": {
+         "Aaix\\EloquentTranslatable\\": "src/"
+      }
+   },
+   "autoload-dev": {
+      "psr-4": {
+         "Aaix\\EloquentTranslatable\\Tests\\": "tests/"
+      }
+   },
+   "scripts": {
+      "test": "vendor/bin/pest --testsuite=\"Unit Feature Tests\"",
+      "test-coverage": "vendor/bin/pest --coverage --testsuite=\"Unit &amp; Feature Tests\""
+   },
+   "config": {
+      "sort-packages": true,
+      "allow-plugins": {
+         "pestphp/pest-plugin": true
+      }
+   },
+   "extra": {
+      "laravel": {
+         "providers": [
+            "Aaix\\EloquentTranslatable\\EloquentTranslatableServiceProvider"
+         ]
+      }
+   },
+   "minimum-stability": "dev",
+   "prefer-stable": true
 }
