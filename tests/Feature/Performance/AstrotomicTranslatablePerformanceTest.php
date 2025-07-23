@@ -44,7 +44,7 @@ class AstrotomicTranslatablePerformanceTest extends BasePerformanceTest
                'astrotomic_product_id' => $product->id,
                'locale' => $locale,
                'name' => "Product {$product->id} name {$locale}",
-               'description' => "Product {$product->id} description {$locale}",
+               'description' => $this->getFaker()->paragraphs(5, true),
             ];
          }
       }

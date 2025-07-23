@@ -29,7 +29,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
       for ($i = $startIndex; $i < $startIndex + $count; $i++) {
          $products[] = EloquentProduct::create([
             'name' => "Product {$i} name en",
-            'description' => "Product {$i} description en",
+            'description' => $this->getFaker()->paragraphs(5, true),
          ]);
       }
 
@@ -46,7 +46,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
                'aaix_product_id' => $product->id,
                'locale' => $locale,
                'column_name' => 'description',
-               'translation' => "Product {$product->id} description {$locale}",
+               'translation' => $this->getFaker()->paragraphs(5, true),
             ];
          }
       }
@@ -71,18 +71,26 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
       return $product->getTranslation('name', $locale);
    }
 
-   protected function queryByName(string $name, string $locale): object
+   protected function queryByName(string $name, string $locale): ?object
    {
-      return EloquentProduct::whereHas('translations', function ($query) use ($name, $locale) {
-         $query->where('column_name', 'name')
-            ->where('translation', $name)
-            ->where('locale', $locale);
-      })->first();
+      $productData = DB::table('aaix_products')
+         ->join('aaix_product_translations', 'aaix_products.id', '=', 'aaix_product_translations.aaix_product_id')
+         ->where('aaix_product_translations.column_name', 'name')
+         ->where('aaix_product_translations.translation', $name)
+         ->where('aaix_product_translations.locale', $locale)
+         ->select('aaix_products.*')
+         ->first();
+
+      if (!$productData) {
+         return null;
+      }
+
+      return EloquentProduct::hydrate([$productData])[0];
    }
 
    protected function eagerLoadProducts(int $count): void
    {
-      $products = EloquentProduct::with('translations')->limit($count)->get();
+      $products = EloquentProduct::limit($count)->get();
       foreach ($products as $product) {
          $this->assertNotNull($product->getTranslation('name', 'de'));
       }

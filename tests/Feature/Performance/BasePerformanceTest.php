@@ -37,7 +37,7 @@ abstract class BasePerformanceTest extends TestCase
    abstract protected function pruneChunk(int $count): void;
    abstract protected function getProduct(int $id): object;
    abstract protected function getTranslatedName(object $product, string $locale): ?string;
-   abstract protected function queryByName(string $name, string $locale): object;
+   abstract protected function queryByName(string $name, string $locale): ?object;
    abstract protected function eagerLoadProducts(int $count): void;
    abstract protected function createWithOneTranslation(): void;
    abstract protected function createWithAllTranslations(): void;

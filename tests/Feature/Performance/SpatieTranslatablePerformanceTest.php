@@ -34,7 +34,7 @@ class SpatieTranslatablePerformanceTest extends BasePerformanceTest
 
          foreach ($this->locales as $locale) {
             $nameTranslations[$locale] = "Product {$i} name {$locale}";
-            $descriptionTranslations[$locale] = "Product {$i} description {$locale}";
+            $descriptionTranslations[$locale] = $this->getFaker()->paragraphs(5, true);
          }
 
          $productsToInsert[] = [
