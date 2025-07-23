@@ -58,7 +58,6 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function pruneChunk(int $count): void
    {
-      // The on-delete cascade constraint on the translation table will handle the cleanup.
       EloquentProduct::query()->latest('id')->limit($count)->delete();
    }
 
@@ -79,5 +78,43 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
             ->where('translation', $name)
             ->where('locale', $locale);
       })->first();
+   }
+
+   protected function eagerLoadProducts(int $count): void
+   {
+      $products = EloquentProduct::with('translations')->limit($count)->get();
+      foreach ($products as $product) {
+         $this->assertNotNull($product->getTranslation('name', 'de'));
+      }
+   }
+
+   protected function createWithOneTranslation(): void
+   {
+      $product = EloquentProduct::create([
+         'name' => 'Test',
+         'description' => 'Test Description',
+      ]);
+      $product->storeTranslation('name', 'de', 'Test DE');
+      $product->delete();
+   }
+
+   protected function createWithAllTranslations(): void
+   {
+      $product = EloquentProduct::create([
+         'name' => 'Test',
+         'description' => 'Test Description',
+      ]);
+      $translations = [];
+      foreach ($this->locales as $locale) {
+         $translations[$locale] = "Test {$locale}";
+      }
+      $product->storeTranslations('name', $translations);
+      $product->delete();
+   }
+
+   protected function updateOneTranslation(): void
+   {
+      $product = EloquentProduct::find(1);
+      $product->storeTranslation('name', 'de', 'Updated Test DE');
    }
 }

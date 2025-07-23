@@ -55,7 +55,6 @@ class SpatieTranslatablePerformanceTest extends BasePerformanceTest
       SpatieProduct::query()->latest('id')->limit($count)->delete();
    }
 
-
    protected function getProduct(int $id): object
    {
       return SpatieProduct::find($id);
@@ -69,5 +68,45 @@ class SpatieTranslatablePerformanceTest extends BasePerformanceTest
    protected function queryByName(string $name, string $locale): object
    {
       return SpatieProduct::where("name->{$locale}", $name)->first();
+   }
+
+   protected function eagerLoadProducts(int $count): void
+   {
+      $products = SpatieProduct::limit($count)->get();
+      foreach ($products as $product) {
+         $this->assertNotNull($product->getTranslation('name', 'de'));
+      }
+   }
+
+   protected function createWithOneTranslation(): void
+   {
+      $product = new SpatieProduct();
+      $product->setTranslation('name', 'de', 'Test DE');
+      $product->setTranslation('description', 'de', 'Test Description DE');
+      $product->save();
+      $product->delete();
+   }
+
+   protected function createWithAllTranslations(): void
+   {
+      $nameTranslations = [];
+      $descriptionTranslations = [];
+      foreach ($this->locales as $locale) {
+         $nameTranslations[$locale] = "Test {$locale}";
+         $descriptionTranslations[$locale] = "Description {$locale}";
+      }
+      $product = new SpatieProduct([
+         'name' => $nameTranslations,
+         'description' => $descriptionTranslations,
+      ]);
+      $product->save();
+      $product->delete();
+   }
+
+   protected function updateOneTranslation(): void
+   {
+      $product = SpatieProduct::find(1);
+      $product->setTranslation('name', 'de', 'Updated Test DE');
+      $product->save();
    }
 }

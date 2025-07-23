@@ -17,16 +17,14 @@ abstract class BasePerformanceTest extends TestCase
    protected array $locales = ['en', 'de', 'fr', 'es', 'nl'];
    protected OutputStyle $output;
 
+   protected static array $baselineResults = [];
+
    public function setUp(): void
    {
-      // This runs the setup from the parent TestCase (which loads general migrations).
       parent::setUp();
-
-      // Now, we load the specific migrations for the performance tests.
       $this->loadMigrationsFrom(__DIR__.'/../../database/migrations/performance');
    }
 
-   // ... (Der Rest der Datei von __construct bis zum Ende bleibt unverändert) ...
    public function __construct(?string $name = null, array $data = [], $dataName = '')
    {
       parent::__construct($name, $data, $dataName);
@@ -40,6 +38,10 @@ abstract class BasePerformanceTest extends TestCase
    abstract protected function getProduct(int $id): object;
    abstract protected function getTranslatedName(object $product, string $locale): ?string;
    abstract protected function queryByName(string $name, string $locale): object;
+   abstract protected function eagerLoadProducts(int $count): void;
+   abstract protected function createWithOneTranslation(): void;
+   abstract protected function createWithAllTranslations(): void;
+   abstract protected function updateOneTranslation(): void;
 
    public function prepareDatabase(): void
    {
@@ -77,15 +79,31 @@ abstract class BasePerformanceTest extends TestCase
       $randomId = random_int(1, $this->productCount);
       $randomLocale = $this->locales[random_int(0, count($this->locales) - 1)];
 
-      $this->measure('Single Product Retrieval', function () use ($randomId, $randomLocale) {
+      $this->measure('Read: Lazy Load 1 Translation', function () use ($randomId, $randomLocale) {
          $product = $this->getProduct($randomId);
          $this->assertNotNull($product);
          $this->getTranslatedName($product, $randomLocale);
       });
 
-      $this->measure('Single Product Query', function () {
+      $this->measure('Read: Query `where` 1 Transl.', function () {
          $product = $this->queryByName('Product 500 name de', 'de');
          $this->assertNotNull($product);
+      });
+
+      $this->measure('Read: Eager Load 50 Products', function () {
+         $this->eagerLoadProducts(50);
+      });
+
+      $this->measure('Write: Create + 1 Translation', function () {
+         $this->createWithOneTranslation();
+      });
+
+      $this->measure('Write: Create + All Transl.', function () {
+         $this->createWithAllTranslations();
+      });
+
+      $this->measure('Write: Update 1 Translation', function () {
+         $this->updateOneTranslation();
       });
    }
 
@@ -109,9 +127,34 @@ abstract class BasePerformanceTest extends TestCase
    protected function logPerformance(string $name, float $duration, float $memoryUsage): void
    {
       $driver = str_pad($this->getDriverName(), 30);
-      $name = str_pad($name, 30);
-      $duration = str_pad(round($duration, 2) . ' ms', 15);
-      fwrite(STDOUT, "{$driver} | {$name} | {$duration} | " . round($memoryUsage, 2) . " KB\n");
+      $testName = str_pad($name, 30);
+      $durationStr = str_pad(round($duration, 2) . ' ms', 15);
+      $memoryStr = round($memoryUsage, 2) . " KB";
+      $baselineDriver = 'aaix/eloquent-translatable';
+
+      if ($this->getDriverName() === $baselineDriver) {
+         self::$baselineResults[$name] = ['duration' => $duration, 'memory' => $memoryUsage];
+         $this->output->writeln("{$driver} | {$testName} | {$durationStr} | {$memoryStr}");
+         return;
+      }
+
+      if (isset(self::$baselineResults[$name])) {
+         $baseline = self::$baselineResults[$name];
+
+         if ($baseline['duration'] > 0.01) {
+            $durationDiff = (($duration - $baseline['duration']) / $baseline['duration']) * 100;
+            $durationColor = $durationDiff <= 0 ? 'info' : 'error';
+            $durationStr .= str_pad(sprintf("<%s> (%+.1f%%)</%s>", $durationColor, $durationDiff, $durationColor), 22);
+         }
+
+         if ($baseline['memory'] > 0.01) {
+            $memoryDiff = (($memoryUsage - $baseline['memory']) / $baseline['memory']) * 100;
+            $memoryColor = $memoryDiff <= 0 ? 'info' : 'error';
+            $memoryStr .= sprintf(" <%s>(%+.1f%%)</%s>", $memoryColor, $memoryDiff, $memoryColor);
+         }
+      }
+
+      $this->output->writeln("{$driver} | {$testName} | {$durationStr} | {$memoryStr}");
    }
 
    protected function getFaker(): \Faker\Generator
