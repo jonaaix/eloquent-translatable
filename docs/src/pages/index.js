@@ -60,9 +60,9 @@ export default function Home() {
                               </div>
                               <div className={styles.comparisonRow}>
                                  <div className={styles.comparisonCell}><strong>Performance</strong></div>
-                                 <div className={`${styles.comparisonCell} ${styles.ownPackage}`}>High (Direct Queries)</div>
-                                 <div className={styles.comparisonCell}>Medium (JSON Parsing)</div>
-                                 <div className={styles.comparisonCell}>Low (Eloquent Overhead)</div>
+                                 <div className={`${styles.comparisonCell} ${styles.ownPackage}`}>High (Scalable)</div>
+                                 <div className={styles.comparisonCell}>Fastest (Single Record Reads)</div>
+                                 <div className={styles.comparisonCell}>Eloquent (Integrated)</div>
                               </div>
                               <div className={styles.comparisonRow}>
                                  <div className={styles.comparisonCell}><strong>Simplicity</strong></div>
