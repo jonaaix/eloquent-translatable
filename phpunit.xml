@@ -8,11 +8,23 @@
       <testsuite name="Unit Feature Tests">
          <directory suffix="Test.php">./tests</directory>
          <exclude>./tests/Feature/Performance</exclude>
+         <php>
+            <env name="DB_CONNECTION" value="sqlite"/>
+            <env name="DB_DATABASE" value=":memory:"/>
+         </php>
       </testsuite>
       <testsuite name="Performance Tests">
          <file>./tests/Feature/Performance/EloquentTranslatablePerformanceTest.php</file>
          <file>./tests/Feature/Performance/SpatieTranslatablePerformanceTest.php</file>
          <file>./tests/Feature/Performance/AstrotomicTranslatablePerformanceTest.php</file>
+         <php>
+            <env name="DB_CONNECTION" value="mysql"/>
+            <env name="DB_HOST" value="127.0.0.1"/>
+            <env name="DB_PORT" value="3307"/>
+            <env name="DB_DATABASE" value="eloquent_translatable_test"/>
+            <env name="DB_USERNAME" value="root"/>
+            <env name="DB_PASSWORD" value="password"/>
+         </php>
       </testsuite>
    </testsuites>
    <source>
@@ -21,12 +33,4 @@
          <directory suffix=".php">./src</directory>
       </include>
    </source>
-   <php>
-      <env name="DB_CONNECTION" value="mysql"/>
-      <env name="DB_HOST" value="127.0.0.1"/>
-      <env name="DB_PORT" value="3307"/>
-      <env name="DB_DATABASE" value="eloquent_translatable_test"/>
-      <env name="DB_USERNAME" value="root"/>
-      <env name="DB_PASSWORD" value="password"/>
-   </php>
 </phpunit>
