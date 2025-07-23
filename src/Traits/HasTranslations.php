@@ -7,6 +7,8 @@ use Aaix\EloquentTranslatable\Traits\Internal\ManagesPersistence;
 use Aaix\EloquentTranslatable\Traits\Internal\ProvidesApi;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
 trait HasTranslations
@@ -119,5 +121,35 @@ trait HasTranslations
         return !empty($this->translationForeignKey)
             ? $this->translationForeignKey
             : Str::snake(class_basename($this)) . '_' . $this->getKeyName();
+    }
+
+    /**
+     * Resolves the translated value for a given column and locale, applying fallbacks.
+     */
+    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
+    {
+        $this->loadTranslationsOnce();
+
+        $localesToCheck = array_unique(
+            array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
+        );
+
+        foreach ($localesToCheck as $currentLocale) {
+            $translation = $this->loadedTranslations->where('column_name', $column)->where('locale', $currentLocale)->first();
+            if ($translation !== null) {
+                return $translation->translation;
+            }
+        }
+
+        return $this->getOriginal($column);
+    }
+
+    /**
+     * Refreshes the translation cache by clearing and reloading from the database.
+     */
+    protected function refreshTranslations(): void
+    {
+        $this->loadedTranslations = null;
+        $this->loadTranslationsOnce();
     }
 }

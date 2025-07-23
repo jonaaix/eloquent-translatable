@@ -6,7 +6,6 @@ use Aaix\EloquentTranslatable\Enums\Locale;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-
 trait ManagesPersistence
 {
     /**
@@ -83,5 +82,23 @@ trait ManagesPersistence
                 ],
             );
         }
+    }
+
+    /**
+     * Deletes translations for the current model instance.
+     */
+    public function deleteTranslations(string|array|null $locales = null): void
+    {
+        if ($locales) {
+            $locales = array_map(static function ($locale) {
+                return $locale instanceof Locale ? $locale->value : $locale;
+            }, (array) $locales);
+        }
+        $query = DB::table($this->getTranslationsTableName())->where($this->getTranslationForeignKey(), $this->getKey());
+        if ($locales) {
+            $query->whereIn('locale', $locales);
+        }
+        $query->delete();
+        $this->refreshTranslations();
     }
 }

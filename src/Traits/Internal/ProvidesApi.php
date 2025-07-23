@@ -137,51 +137,7 @@ trait ProvidesApi
         return $this;
     }
 
-    /**
-     * Deletes translations for the current model instance.
-     */
-    public function deleteTranslations(string|array|null $locales = null): void
-    {
-        if ($locales) {
-            $locales = array_map(static function ($locale) {
-                return $locale instanceof Locale ? $locale->value : $locale;
-            }, (array) $locales);
-        }
-        $query = DB::table($this->getTranslationsTableName())->where($this->getTranslationForeignKey(), $this->getKey());
-        if ($locales) {
-            $query->whereIn('locale', $locales);
-        }
-        $query->delete();
-        $this->refreshTranslations();
-    }
+    
 
-    /**
-     * Resolves the translated value for a given column and locale, applying fallbacks.
-     */
-    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
-    {
-        $this->loadTranslationsOnce();
-
-        $localesToCheck = array_unique(
-            array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
-        );
-
-        foreach ($localesToCheck as $currentLocale) {
-            $translation = $this->loadedTranslations->where('column_name', $column)->where('locale', $currentLocale)->first();
-            if ($translation !== null) {
-                return $translation->translation;
-            }
-        }
-
-        return $this->getOriginal($column);
-    }
-
-    /**
-     * Refreshes the translation cache by clearing and reloading from the database.
-     */
-    protected function refreshTranslations(): void
-    {
-        $this->loadedTranslations = null;
-        $this->loadTranslationsOnce();
-    }
+    
 }
