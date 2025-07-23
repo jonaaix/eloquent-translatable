@@ -15,7 +15,7 @@ For security and clarity, you must define which model attributes are translatabl
 public array $translatable = ['name', 'description'];
 ```
 
-For special cases, you can also configure attributes to be handled as [translatable JSON objects](./2-access-translations.md#4-accessing-json-translations). For example, by defining the following property in your model:
+For special cases, you can also configure attributes to be handled as [translatable JSON objects](./30-access-translations.md#4-accessing-json-translations). For example, by defining the following property in your model:
 
 ```php
 public array $allowJsonTranslationsFor = ['options'];
@@ -46,7 +46,7 @@ protected ?string $translationForeignKey = 'my_product_id';
 
 ## Custom Translation Model
 
-If you are using the optional [Eloquent Relationship](./93-eloquent-relationship.md), you can specify the fully qualified class name (FQCN) of your translation model. This is useful if your model does not follow the standard `YourModelTranslation` naming convention.
+If you are using the optional [Eloquent Relationship](./80-eloquent-relationship.md), you can specify the fully qualified class name (FQCN) of your translation model. This is useful if your model does not follow the standard `YourModelTranslation` naming convention.
 
 ```php
 // In your model
