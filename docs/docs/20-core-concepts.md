@@ -66,3 +66,12 @@ echo $product->name; // Output: "Notebook"
 // 5. Returns "Laptop".
 echo $product->name; // Output: "Laptop"
 ```
+
+## Staging and Persisting Translations
+
+To maximize efficiency, the package does not write to the database every time you set a translation. Instead, it intelligently hooks into Eloquent's own lifecycle.
+
+1.  **Staging:** When you assign a translation (e.g., by using `setLocale()` and then setting an attribute), it's held in memory on the model instance. This is called "staging".
+2.  **Persisting:** When you call the model's standard `save()` method, the trait automatically persists all staged translations to the database right after the model itself is saved. This is done by listening to Eloquent's `saved` event.
+
+This default approach minimizes database queries and keeps the process fast and efficient. For use cases where you need to write a translation to the database immediately, the package also provides alternative methods like `storeTranslation()`, which are covered in the detailed usage guides.
