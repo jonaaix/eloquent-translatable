@@ -131,3 +131,22 @@ $options = $product->options;
 // Outputs: ['color' => 'blau', 'size' => 'groß']
 print_r($options);
 ```
+
+## 5. Eager-Loading Translations (Performance)
+
+When you retrieve a collection of models, you often run into the "N+1 query problem," where one query is executed to get the models, and then N additional queries are executed to get the translations for each model.
+
+To solve this, the package provides a `getWithTranslations()` macro that you can use instead of the standard `get()` method. This will eager-load all required translations in a single, efficient query, drastically improving performance.
+
+```php
+// Instead of this (N+1 problem):
+// $products = Product::where('active', true)->get();
+
+// Use this to eager-load translations:
+$products = Product::where('active', true)->getWithTranslations();
+
+foreach ($products as $product) {
+    // No additional queries are executed here.
+    echo $product->name;
+}
+```
