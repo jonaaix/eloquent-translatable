@@ -25,25 +25,33 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function seedChunk(int $count, int $startIndex): void
    {
-      $products = [];
+      $productsToInsert = [];
+      $now = now();
       for ($i = $startIndex; $i < $startIndex + $count; $i++) {
-         $products[] = EloquentProduct::create([
+         $productsToInsert[] = [
             'name' => "Product {$i} name en",
             'description' => $this->getFaker()->paragraphs(5, true),
-         ]);
+            'created_at' => $now,
+            'updated_at' => $now,
+         ];
       }
+      // Bulk insert products
+      EloquentProduct::insert($productsToInsert);
+
+      // Get the IDs of the newly inserted products
+      $lastInsertedIds = EloquentProduct::query()->latest('id')->limit($count)->pluck('id');
 
       $allTranslations = [];
-      foreach ($products as $product) {
+      foreach ($lastInsertedIds as $productId) {
          foreach ($this->locales as $locale) {
             $allTranslations[] = [
-               'aaix_product_id' => $product->id,
+               'aaix_product_id' => $productId,
                'locale' => $locale,
                'column_name' => 'name',
-               'translation' => "Product {$product->id} name {$locale}",
+               'translation' => "Product {$productId} name {$locale}",
             ];
             $allTranslations[] = [
-               'aaix_product_id' => $product->id,
+               'aaix_product_id' => $productId,
                'locale' => $locale,
                'column_name' => 'description',
                'translation' => $this->getFaker()->paragraphs(5, true),
@@ -51,6 +59,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
          }
       }
 
+      // Bulk insert all translations in chunks
       foreach (array_chunk($allTranslations, $this->chunkSize) as $chunk) {
          DB::table('aaix_product_translations')->insert($chunk);
       }
