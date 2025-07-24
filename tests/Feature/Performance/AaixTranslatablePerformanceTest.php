@@ -82,13 +82,7 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function queryByName(string $name, string $locale): ?object
    {
-      return AaixProduct::query()
-         ->join('aaix_product_translations', 'aaix_products.id', '=', 'aaix_product_translations.aaix_product_id')
-         ->where('aaix_product_translations.column_name', 'name')
-         ->where('aaix_product_translations.locale', $locale)
-         ->where('aaix_product_translations.translation', $name)
-         ->select('aaix_products.*')
-         ->first();
+      return AaixProduct::whereTranslation('name', $name, $locale)->first();
    }
 
    protected function eagerLoadProducts(int $count): void
@@ -105,7 +99,10 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
          'name' => 'Test',
          'description' => 'Test Description',
       ]);
+
+      // Revert to storeTranslation to test the newly optimized single-write path
       $product->storeTranslation('name', 'de', 'Test DE');
+
       $product->delete();
    }
 

@@ -5,8 +5,8 @@ namespace Aaix\EloquentTranslatable\Traits;
 use Aaix\EloquentTranslatable\Traits\Internal\HandlesAttributeAccess;
 use Aaix\EloquentTranslatable\Traits\Internal\ManagesPersistence;
 use Aaix\EloquentTranslatable\Traits\Internal\ProvidesApi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
@@ -17,11 +17,10 @@ trait HasTranslations
    use ManagesPersistence;
    use ProvidesApi;
 
-   /** Internal properties to manage translations and locales. */
    protected ?string $activeLocale = null;
-   protected ?Collection $loadedTranslations = null;
    protected array $stagedTranslations = [];
    protected ?array $structuredTranslations = null;
+
    /*
          PROPERTIES TO BE DEFINED ON THE MODEL:
          =========================================
@@ -30,7 +29,30 @@ trait HasTranslations
          protected ?string $translationModel = null;
          protected ?string $translationTable = null;
          protected ?string $translationForeignKey = null;
+   */
+
+   /**
+    * Scope a query to only include models that have a specific translation.
     */
+   public function scopeWhereTranslation(Builder $query, string $column, mixed $value, ?string $locale = null): void
+   {
+      $locale = $locale ?? App::getLocale();
+      $translationTable = $this->getTranslationsTableName();
+      $modelTable = $this->getTable();
+
+      $isAlreadyJoined = collect($query->getQuery()->joins)
+         ->pluck('table')
+         ->contains($translationTable);
+
+      if (!$isAlreadyJoined) {
+         $query->join($translationTable, $modelTable . '.' . $this->getKeyName(), '=', $translationTable . '.' . $this->getTranslationForeignKey())
+            ->select($modelTable . '.*'); // Avoid column collisions
+      }
+
+      $query->where($translationTable . '.column_name', '=', $column)
+         ->where($translationTable . '.locale', '=', $locale)
+         ->where($translationTable . '.translation', '=', $value);
+   }
 
    public static function bootHasTranslations(): void
    {
@@ -39,26 +61,15 @@ trait HasTranslations
             unset($model->attributes['_translation_dirty_flag']);
          }
       });
-
       static::saved(static function (Model $model) {
          $model->persistStagedTranslations();
       });
-
       static::deleting(static function (Model $model) {
          if (method_exists($model, 'isForceDeleting') && !$model->isForceDeleting()) {
             return;
          }
          $model->deleteTranslations();
       });
-   }
-
-   /**
-    * Sets the loaded translations collection on the model instance.
-    * Used by the eager loading mechanism.
-    */
-   public function setLoadedTranslations(Collection $translations): void
-   {
-      $this->loadedTranslations = $translations;
    }
 
    protected function getActiveLocale(): ?string
@@ -84,12 +95,14 @@ trait HasTranslations
 
    protected function getTranslationModelName(): string
    {
-      return !empty($this->translationModel) ? $this->translationModel : get_class($this) . 'Translation';
+      return !empty($this->translationModel) ?
+         $this->translationModel : get_class($this) . 'Translation';
    }
 
    public function getTranslationsTableName(): string
    {
-      return !empty($this->translationTable) ? $this->translationTable : Str::singular($this->getTable()) . '_translations';
+      return !empty($this->translationTable) ?
+         $this->translationTable : Str::singular($this->getTable()) . '_translations';
    }
 
    protected function getTranslationForeignKey(): string
@@ -101,16 +114,20 @@ trait HasTranslations
 
    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
    {
-      $this->loadTranslationsOnce();
+      if ($this->structuredTranslations === null) {
+         $this->loadTranslationsOnce();
+      }
 
       $localesToCheck = array_unique(
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
       );
 
-      foreach ($localesToCheck as $currentLocale) {
-         // Use array_key_exists to correctly handle null values.
-         if (isset($this->structuredTranslations[$column]) && array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
-            return $this->structuredTranslations[$column][$currentLocale];
+      // Use array_key_exists to correctly handle intentional null values.
+      if (array_key_exists($column, $this->structuredTranslations ?? [])) {
+         foreach ($localesToCheck as $currentLocale) {
+            if (array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
+               return $this->structuredTranslations[$column][$currentLocale];
+            }
          }
       }
 
@@ -119,9 +136,23 @@ trait HasTranslations
 
    protected function refreshTranslations(): void
    {
-      $this->loadedTranslations = null;
-      $this->structuredTranslations = null;
-      $this->loadTranslationsOnce();
+      $this->unsetRelation('translations');
+      $this->structuredTranslations = null; // Clear the structured cache
    }
 
+   /**
+    * Structures the loaded Eloquent translations into a fast, multi-dimensional array for quick lookups.
+    */
+   public function structureLoadedTranslations(): void
+   {
+      $this->structuredTranslations = [];
+
+      if (!$this->relationLoaded('translations') || $this->translations === null) {
+         return;
+      }
+
+      foreach ($this->translations as $translation) {
+         $this->structuredTranslations[$translation->column_name][$translation->locale] = $translation->translation;
+      }
+   }
 }

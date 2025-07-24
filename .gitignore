@@ -24,3 +24,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+tests/Feature/Performance/baseline_results.json
+tests/Feature/Performance/performance_summary.json

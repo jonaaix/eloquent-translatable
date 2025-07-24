@@ -5,6 +5,7 @@ namespace Aaix\EloquentTranslatable\Traits\Internal;
 use Aaix\EloquentTranslatable\Enums\Locale;
 use Aaix\EloquentTranslatable\Exceptions\AttributeIsNotTranslatable;
 use Aaix\EloquentTranslatable\TranslationProxy;
+use Aaix\EloquentTranslatable\Models\Translation;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
@@ -19,13 +20,22 @@ trait ProvidesApi
     */
    public function translations(): HasMany
    {
-      $modelClass = $this->getTranslationModelName();
-      if (!class_exists($modelClass)) {
-         throw new RuntimeException(
-            "The translation model '{$modelClass}' does not exist. Please create it to use the translations() relationship.",
-         );
+      $customModelName = $this->getTranslationModelName();
+
+      if (class_exists($customModelName)) {
+         // If a custom model exists, use it as before.
+         return $this->hasMany($customModelName, $this->getTranslationForeignKey());
       }
-      return $this->hasMany($modelClass, $this->getTranslationForeignKey());
+
+      // If no custom model exists, use our internal generic fallback model.
+      // We manually construct the HasMany relationship.
+      $instance = new Translation();
+      $instance->setTable($this->getTranslationsTableName());
+
+      $foreignKey = $this->getTranslationsTableName().'.'.$this->getTranslationForeignKey();
+      $localKey = $this->getKeyName();
+
+      return new HasMany($instance->newQuery(), $this, $foreignKey, $localKey);
    }
 
    /**

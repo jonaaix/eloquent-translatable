@@ -4,7 +4,6 @@ namespace Aaix\EloquentTranslatable\Traits\Internal;
 
 use Aaix\EloquentTranslatable\Enums\Locale;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 trait ManagesPersistence
@@ -18,13 +17,34 @@ trait ManagesPersistence
          return;
       }
 
-      $translations = $this->stagedTranslations;
-      $this->stagedTranslations = [];
-      foreach ($translations as $locale => $translationData) {
+      $foreignKey = $this->getTranslationForeignKey();
+      $modelId = $this->getKey();
+      $allStaged = [];
+
+      foreach ($this->stagedTranslations as $locale => $translationData) {
          foreach ($translationData as $key => $value) {
-            $this->persistTranslation($key, $locale, $value);
+            $allStaged[] = [
+               $foreignKey    => $modelId,
+               'locale'      => $locale,
+               'column_name' => $key,
+               'translation' => $value,
+            ];
          }
       }
+
+      if (empty($allStaged)) {
+         return;
+      }
+
+      // A single upsert operation is significantly more performant than selecting and then partitioning.
+      DB::table($this->getTranslationsTableName())->upsert(
+         $allStaged,
+         [$foreignKey, 'locale', 'column_name'],
+         ['translation'],
+      );
+
+      $this->stagedTranslations = [];
+      $this->refreshTranslations();
    }
 
    /**
@@ -32,22 +52,18 @@ trait ManagesPersistence
     */
    protected function loadTranslationsOnce(): void
    {
-      if ($this->loadedTranslations !== null) {
+      if ($this->relationLoaded('translations')) {
          return;
       }
 
       if (!$this->exists) {
-         $this->loadedTranslations = new Collection();
-      } else {
-         $this->loadedTranslations = DB::table($this->getTranslationsTableName())
-            ->where($this->getTranslationForeignKey(), $this->getKey())
-            ->get();
+         $this->setRelation('translations', new \Illuminate\Database\Eloquent\Collection());
+         return;
       }
 
-      $this->structuredTranslations = [];
-      foreach ($this->loadedTranslations as $translation) {
-         $this->structuredTranslations[$translation->column_name][$translation->locale] = $translation->translation;
-      }
+      // Use the relationship to load translations, then structure them for fast access.
+      $this->load('translations');
+      $this->structureLoadedTranslations();
    }
 
    /**
@@ -63,60 +79,81 @@ trait ManagesPersistence
       $foreignKey = $firstModel->getTranslationForeignKey();
       $modelIds = $collection->pluck($firstModel->getKeyName())->all();
 
-      $translations = DB::table($firstModel->getTranslationsTableName())
+      $translations = $firstModel->translations()
+         ->getModel()
+         ->newQuery()
          ->whereIn($foreignKey, $modelIds)
          ->get()
          ->groupBy($foreignKey);
 
+      // Associate the loaded translations and structure them on each model.
       $collection->each(function ($model) use ($translations, $foreignKey) {
-         $modelTranslations = $translations->get($model->getKey(), new Collection());
-         $model->setLoadedTranslations($modelTranslations);
+         $modelTranslations = $translations->get($model->getKey(), new \Illuminate\Database\Eloquent\Collection());
+         $model->setRelation('translations', $modelTranslations);
+         $model->structureLoadedTranslations();
       });
    }
 
    /**
-    * Persists a single translation to the database.
+    * Persists a single translation directly to the database using an efficient upsert operation.
     */
    private function persistTranslation(string $key, string|Locale $locale, ?string $value): void
    {
       $localeValue = $locale instanceof Locale ? $locale->value : $locale;
+      $foreignKey = $this->getTranslationForeignKey();
 
-      DB::table($this->getTranslationsTableName())->updateOrInsert(
+      DB::table($this->getTranslationsTableName())->upsert(
          [
-            $this->getTranslationForeignKey() => $this->getKey(),
-            'locale' => $localeValue,
-            'column_name' => $key,
+            [
+               $foreignKey    => $this->getKey(),
+               'locale'      => $localeValue,
+               'column_name' => $key,
+               'translation' => $value,
+            ],
          ],
-         ['translation' => $value],
+         [$foreignKey, 'locale', 'column_name'],
+         ['translation'],
       );
 
       $this->updateLoadedTranslation($key, $localeValue, $value);
    }
 
+
    /**
-    * Updates or adds a single translation to the in-memory cache.
+    * Updates or adds a single translation to the in-memory cache without triggering a db read.
     */
    protected function updateLoadedTranslation(string $key, string $locale, ?string $value): void
    {
-      $this->loadTranslationsOnce();
+      // If the cache has never been loaded, just initialize it and add the new value.
+      // This avoids a costly database read-back after an instant save.
+      if ($this->structuredTranslations === null) {
+         $this->structuredTranslations = [];
+      }
+      $this->structuredTranslations[$key][$locale] = $value;
 
-      $translation = $this->loadedTranslations->where('column_name', $key)->where('locale', $locale)->first();
+      // If the full Eloquent relationship happens to be loaded, keep it in sync too for consistency.
+      if (!$this->relationLoaded('translations')) {
+         return;
+      }
+
+      $translation = $this->translations
+         ->where('column_name', $key)
+         ->where('locale', $locale)
+         ->first();
 
       if ($translation) {
          $translation->translation = $value;
       } else {
-         $this->loadedTranslations->push(
-            (object) [
-               $this->getTranslationForeignKey() => $this->getKey(),
-               'locale' => $locale,
+         $modelClass = $this->getTranslationModelName();
+         if (class_exists($modelClass)) {
+            $newTranslation = new $modelClass([
+               'locale'      => $locale,
                'column_name' => $key,
                'translation' => $value,
-            ],
-         );
+            ]);
+            $this->translations->push($newTranslation);
+         }
       }
-
-      // Keep the structured cache in sync
-      $this->structuredTranslations[$key][$locale] = $value;
    }
 
    /**

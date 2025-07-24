@@ -11,6 +11,9 @@
       <env name="DB_DATABASE" value="eloquent_translatable_test"/>
       <env name="DB_USERNAME" value="root"/>
       <env name="DB_PASSWORD" value="password"/>
+
+      <env name="LOG_QUERIES" value="false"/>
+      <!-- <env name="LOG_QUERIES" value="true"/> -->
    </php>
 
    <testsuites>
