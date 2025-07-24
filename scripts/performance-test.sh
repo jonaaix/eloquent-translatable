@@ -41,6 +41,6 @@ done
 
 echo "Database is ready. Running performance tests..."
 
-vendor/bin/pest --testsuite="Performance Tests"
+vendor/bin/pest -c phpunit.performance.xml --testsuite="Performance Tests"
 
 echo "Tests finished. Please stop the container manually with: docker stop ${DB_CONTAINER_NAME}"
