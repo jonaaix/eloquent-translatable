@@ -2,10 +2,10 @@
 
 namespace Aaix\EloquentTranslatable\Tests\Feature\Performance;
 
-use Aaix\EloquentTranslatable\Tests\Models\EloquentProduct;
+use Aaix\EloquentTranslatable\Tests\Models\AaixProduct;
 use Illuminate\Support\Facades\DB;
 
-class EloquentTranslatablePerformanceTest extends BasePerformanceTest
+class AaixTranslatablePerformanceTest extends BasePerformanceTest
 {
    public function setUp(): void
    {
@@ -20,7 +20,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function getModelClass(): string
    {
-      return EloquentProduct::class;
+      return AaixProduct::class;
    }
 
    protected function seedChunk(int $count, int $startIndex): void
@@ -36,10 +36,10 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
          ];
       }
       // Bulk insert products
-      EloquentProduct::insert($productsToInsert);
+      AaixProduct::insert($productsToInsert);
 
       // Get the IDs of the newly inserted products
-      $lastInsertedIds = EloquentProduct::query()->latest('id')->limit($count)->pluck('id');
+      $lastInsertedIds = AaixProduct::query()->latest('id')->limit($count)->pluck('id');
 
       $allTranslations = [];
       foreach ($lastInsertedIds as $productId) {
@@ -67,12 +67,12 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function pruneChunk(int $count): void
    {
-      EloquentProduct::query()->latest('id')->limit($count)->delete();
+      AaixProduct::query()->latest('id')->limit($count)->delete();
    }
 
    protected function getProduct(int $id): object
    {
-      return EloquentProduct::find($id);
+      return AaixProduct::find($id);
    }
 
    protected function getTranslatedName(object $product, string $locale): ?string
@@ -82,24 +82,18 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function queryByName(string $name, string $locale): ?object
    {
-      $productData = DB::table('aaix_products')
+      return AaixProduct::query()
          ->join('aaix_product_translations', 'aaix_products.id', '=', 'aaix_product_translations.aaix_product_id')
          ->where('aaix_product_translations.column_name', 'name')
-         ->where('aaix_product_translations.translation', $name)
          ->where('aaix_product_translations.locale', $locale)
+         ->where('aaix_product_translations.translation', $name)
          ->select('aaix_products.*')
          ->first();
-
-      if (!$productData) {
-         return null;
-      }
-
-      return EloquentProduct::hydrate([$productData])[0];
    }
 
    protected function eagerLoadProducts(int $count): void
    {
-      $products = EloquentProduct::limit($count)->getWithTranslations();
+      $products = AaixProduct::limit($count)->getWithTranslations();
       foreach ($products as $product) {
          $this->assertNotNull($product->getTranslation('name', 'de'));
       }
@@ -107,7 +101,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function createWithOneTranslation(): void
    {
-      $product = EloquentProduct::create([
+      $product = AaixProduct::create([
          'name' => 'Test',
          'description' => 'Test Description',
       ]);
@@ -117,7 +111,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function createWithAllTranslations(): void
    {
-      $product = EloquentProduct::create([
+      $product = AaixProduct::create([
          'name' => 'Test',
          'description' => 'Test Description',
       ]);
@@ -131,7 +125,7 @@ class EloquentTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function updateOneTranslation(): void
    {
-      $product = EloquentProduct::find(1);
+      $product = AaixProduct::find(1);
       $product->storeTranslation('name', 'de', 'Updated Test DE');
    }
 }

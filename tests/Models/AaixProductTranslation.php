@@ -4,7 +4,7 @@ namespace Aaix\EloquentTranslatable\Tests\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EloquentProductTranslation extends Model
+class AaixProductTranslation extends Model
 {
    public $timestamps = false;
 
