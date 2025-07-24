@@ -15,9 +15,9 @@
 
    <testsuites>
       <testsuite name="Performance Tests">
-         <file>./tests/Feature/Performance/EloquentTranslatablePerformanceTest.php</file>
-         <file>./tests/Feature/Performance/SpatieTranslatablePerformanceTest.php</file>
+         <file>./tests/Feature/Performance/AaixTranslatablePerformanceTest.php</file>
          <file>./tests/Feature/Performance/AstrotomicTranslatablePerformanceTest.php</file>
+         <file>./tests/Feature/Performance/SpatieTranslatablePerformanceTest.php</file>
       </testsuite>
    </testsuites>
 </phpunit>
