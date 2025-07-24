@@ -64,12 +64,6 @@ trait HasTranslations
       static::saved(static function (Model $model) {
          $model->persistStagedTranslations();
       });
-      static::deleting(static function (Model $model) {
-         if (method_exists($model, 'isForceDeleting') && !$model->isForceDeleting()) {
-            return;
-         }
-         $model->deleteTranslations();
-      });
    }
 
    protected function getActiveLocale(): ?string
@@ -114,15 +108,12 @@ trait HasTranslations
 
    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
    {
-      if ($this->structuredTranslations === null) {
-         $this->loadTranslationsOnce();
-      }
+      $this->ensureTranslationsAreLoaded();
 
       $localesToCheck = array_unique(
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
       );
 
-      // Use array_key_exists to correctly handle intentional null values.
       if (array_key_exists($column, $this->structuredTranslations ?? [])) {
          foreach ($localesToCheck as $currentLocale) {
             if (array_key_exists($currentLocale, $this->structuredTranslations[$column])) {

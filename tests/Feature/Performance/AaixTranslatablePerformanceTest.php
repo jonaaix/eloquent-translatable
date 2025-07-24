@@ -95,13 +95,17 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function createWithOneTranslation(): void
    {
-      $product = AaixProduct::create([
-         'name' => 'Test',
+      $product = new AaixProduct([
+         'name'        => 'Test',
          'description' => 'Test Description',
       ]);
 
-      // Revert to storeTranslation to test the newly optimized single-write path
-      $product->storeTranslation('name', 'de', 'Test DE');
+      // Stage the translation first
+      $product->setTranslation('name', 'de', 'Test DE');
+
+      // Now save the model and the staged translation together.
+      // This triggers the highly optimized 'persistStagedTranslations' method.
+      $product->save();
 
       $product->delete();
    }

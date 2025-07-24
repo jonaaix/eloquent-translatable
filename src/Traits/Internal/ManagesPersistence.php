@@ -36,38 +36,57 @@ trait ManagesPersistence
          return;
       }
 
-      // A single upsert operation is significantly more performant than selecting and then partitioning.
       DB::table($this->getTranslationsTableName())->upsert(
          $allStaged,
          [$foreignKey, 'locale', 'column_name'],
          ['translation'],
       );
 
+      // Clear staged translations and internal caches directly without a refresh.
+      // The cache will be repopulated on the next read request if needed.
       $this->stagedTranslations = [];
-      $this->refreshTranslations();
+      $this->structuredTranslations = null;
+      $this->unsetRelation('translations');
    }
 
    /**
-    * Loads all translations for this model instance from the database once.
+    * Ensure translations are loaded, either from an existing Eloquent relation or via a raw query.
+    * This populates the structured cache for fast lookups.
     */
-   protected function loadTranslationsOnce(): void
+   protected function ensureTranslationsAreLoaded(): void
    {
+      // If the fast cache is already populated, we're done.
+      if ($this->structuredTranslations !== null) {
+         return;
+      }
+
+      // If the developer has already eager-loaded the Eloquent relationship,
+      // use that as the source of truth to build our cache, avoiding a new query.
       if ($this->relationLoaded('translations')) {
+         $this->structureLoadedTranslations();
          return;
       }
 
+      // If the model doesn't exist, initialize an empty cache.
       if (!$this->exists) {
-         $this->setRelation('translations', new \Illuminate\Database\Eloquent\Collection());
+         $this->structuredTranslations = [];
          return;
       }
 
-      // Use the relationship to load translations, then structure them for fast access.
-      $this->load('translations');
-      $this->structureLoadedTranslations();
+      // As a last resort, fetch translations via a fast, raw query.
+      $translations = DB::table($this->getTranslationsTableName())
+         ->where($this->getTranslationForeignKey(), $this->getKey())
+         ->get(['locale', 'column_name', 'translation']);
+
+      $structured = [];
+      foreach ($translations as $translation) {
+         $structured[$translation->column_name][$translation->locale] = $translation->translation;
+      }
+      $this->structuredTranslations = $structured;
    }
 
    /**
-    * Eager-loads translations for a collection of models.
+    * Eager-loads translations for a collection using a raw query for maximum performance.
     */
    public static function loadTranslationsForCollection(EloquentCollection $collection): void
    {
@@ -76,21 +95,40 @@ trait ManagesPersistence
       }
 
       $firstModel = $collection->first();
+
+      // Respect if the developer already eager-loaded the 'translations' relation.
+      if ($firstModel->relationLoaded('translations')) {
+         $collection->each(function ($model) {
+            if ($model->relationLoaded('translations')) {
+               $model->structureLoadedTranslations();
+            }
+         });
+         return;
+      }
+
       $foreignKey = $firstModel->getTranslationForeignKey();
       $modelIds = $collection->pluck($firstModel->getKeyName())->all();
 
-      $translations = $firstModel->translations()
-         ->getModel()
-         ->newQuery()
+      $allTranslations = DB::table($firstModel->getTranslationsTableName())
          ->whereIn($foreignKey, $modelIds)
-         ->get()
-         ->groupBy($foreignKey);
+         ->get(['locale', 'column_name', 'translation', $foreignKey]);
 
-      // Associate the loaded translations and structure them on each model.
-      $collection->each(function ($model) use ($translations, $foreignKey) {
-         $modelTranslations = $translations->get($model->getKey(), new \Illuminate\Database\Eloquent\Collection());
-         $model->setRelation('translations', $modelTranslations);
-         $model->structureLoadedTranslations();
+      $groupedTranslations = $allTranslations->groupBy($foreignKey);
+
+      $collection->each(function ($model) use ($groupedTranslations, $foreignKey) {
+         $modelTranslations = $groupedTranslations->get($model->getKey());
+         $structured = [];
+
+         if ($modelTranslations) {
+            foreach ($modelTranslations as $translation) {
+               $structured[$translation->column_name][$translation->locale] = $translation->translation;
+            }
+         }
+
+         // Manually set the structured cache and mark the Eloquent relation as loaded (with an empty collection)
+         // to prevent any N+1 issues if the relation is accessed later.
+         $model->structuredTranslations = $structured;
+         $model->setRelation('translations', new \Illuminate\Database\Eloquent\Collection());
       });
    }
 

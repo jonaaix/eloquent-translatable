@@ -42,8 +42,8 @@ run_test_for_package() {
     echo "========================================================================"
 
     # Restart the container to flush database server caches for a fair test
-    # echo "Restarting database container to reset server state..."
-    # docker restart "${DB_CONTAINER_NAME}" > /dev/null
+#     echo "Restarting database container to reset server state..."
+#     docker restart "${DB_CONTAINER_NAME}" > /dev/null
 
     # Wait for the database to become healthy
     echo "Waiting for the database container to become healthy..."

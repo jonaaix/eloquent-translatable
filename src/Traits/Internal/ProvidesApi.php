@@ -81,7 +81,7 @@ trait ProvidesApi
     */
    public function getTranslations(?string $columnName = null): Collection
    {
-      $this->loadTranslationsOnce();
+      $this->ensureTranslationsAreLoaded();
       if ($columnName) {
          return $this->loadedTranslations->where('column_name', $columnName);
       }
