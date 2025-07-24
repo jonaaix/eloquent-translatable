@@ -21,6 +21,7 @@ trait HasTranslations
    protected ?string $activeLocale = null;
    protected ?Collection $loadedTranslations = null;
    protected array $stagedTranslations = [];
+   protected ?array $structuredTranslations = null;
    /*
          PROPERTIES TO BE DEFINED ON THE MODEL:
          =========================================
@@ -101,13 +102,15 @@ trait HasTranslations
    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
    {
       $this->loadTranslationsOnce();
+
       $localesToCheck = array_unique(
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
       );
+
       foreach ($localesToCheck as $currentLocale) {
-         $translation = $this->loadedTranslations->where('column_name', $column)->where('locale', $currentLocale)->first();
-         if ($translation !== null) {
-            return $translation->translation;
+         // Use array_key_exists to correctly handle null values.
+         if (isset($this->structuredTranslations[$column]) && array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
+            return $this->structuredTranslations[$column][$currentLocale];
          }
       }
 
@@ -117,6 +120,8 @@ trait HasTranslations
    protected function refreshTranslations(): void
    {
       $this->loadedTranslations = null;
+      $this->structuredTranslations = null;
       $this->loadTranslationsOnce();
    }
+
 }

@@ -32,14 +32,21 @@ trait ManagesPersistence
     */
    protected function loadTranslationsOnce(): void
    {
-      if ($this->loadedTranslations === null) {
-         if (!$this->exists) {
-            $this->loadedTranslations = new Collection();
-            return;
-         }
+      if ($this->loadedTranslations !== null) {
+         return;
+      }
+
+      if (!$this->exists) {
+         $this->loadedTranslations = new Collection();
+      } else {
          $this->loadedTranslations = DB::table($this->getTranslationsTableName())
             ->where($this->getTranslationForeignKey(), $this->getKey())
             ->get();
+      }
+
+      $this->structuredTranslations = [];
+      foreach ($this->loadedTranslations as $translation) {
+         $this->structuredTranslations[$translation->column_name][$translation->locale] = $translation->translation;
       }
    }
 
@@ -92,6 +99,7 @@ trait ManagesPersistence
    protected function updateLoadedTranslation(string $key, string $locale, ?string $value): void
    {
       $this->loadTranslationsOnce();
+
       $translation = $this->loadedTranslations->where('column_name', $key)->where('locale', $locale)->first();
 
       if ($translation) {
@@ -106,6 +114,9 @@ trait ManagesPersistence
             ],
          );
       }
+
+      // Keep the structured cache in sync
+      $this->structuredTranslations[$key][$locale] = $value;
    }
 
    /**
