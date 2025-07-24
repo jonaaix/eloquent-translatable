@@ -81,13 +81,13 @@ abstract class BasePerformanceTest extends TestCase
       $randomId = random_int(1, $this->productCount);
       $randomLocale = $this->locales[random_int(0, count($this->locales) - 1)];
 
-      $this->measure('Read: Lazy Load 1 Translation', function () use ($randomId, $randomLocale) {
+      $this->measure('Read: Access 1st Translation', function () use ($randomId, $randomLocale) {
          $product = $this->getProduct($randomId);
          $this->assertNotNull($product);
          $this->getTranslatedName($product, $randomLocale);
       });
 
-      $this->measure('Read: Query `where` 1 Transl.', function () {
+      $this->measure('Read: Find by Translation', function () {
          $product = $this->queryByName('Product 500 name de', 'de');
          $this->assertNotNull($product);
       });
