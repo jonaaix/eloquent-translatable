@@ -62,7 +62,7 @@ export default function Home() {
                                  <div className={styles.comparisonCell}><strong>Performance</strong></div>
                                  <div className={`${styles.comparisonCell} ${styles.ownPackage}`}>High (Scalable)</div>
                                  <div className={styles.comparisonCell}>Fastest (Single Record Reads)</div>
-                                 <div className={styles.comparisonCell}>Eloquent (Integrated)</div>
+                                 <div className={styles.comparisonCell}>High (Eloquent)</div>
                               </div>
                               <div className={styles.comparisonRow}>
                                  <div className={styles.comparisonCell}><strong>Simplicity</strong></div>
@@ -71,6 +71,23 @@ export default function Home() {
                                  <div className={styles.comparisonCell}>Requires extra Translation Model class</div>
                               </div>
                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'center'}}>
+<pre>
+{String.raw`======================================================================================================
+                                    🚀 Performance Comparison 🚀
+======================================================================================================
+| Test Case                       | aaix         | astrotomic              | spatie                  |
+|---------------------------------|--------------|-------------------------|-------------------------|
+| Read: Access 1st Translation    | 1.70 ms      | 1.65 ms (-3.1%)         | 0.55 ms (-68.0%)        |
+| Read: Find by Translation       | 1.01 ms      | 1.20 ms (+18.6%)        | 0.89 ms (-12.6%)        |
+| Read: Eager Load 50 Products    | 1.97 ms      | 2.82 ms (+43.3%)        | 1.16 ms (-40.9%)        |
+| Write: Create + 1 Translation   | 1.27 ms      | 1.73 ms (+36.0%)        | 1.04 ms (-17.7%)        |
+| Write: Create + All Transl.     | 1.45 ms      | 3.80 ms (+162.8%)       | 1.03 ms (-28.6%)        |
+| Write: Update 1 Translation     | 0.77 ms      | 0.82 ms (+7.0%)         | 0.41 ms (-46.2%)        |
+======================================================================================================`}
+</pre>
                         </div>
 
                         <hr className={styles.separator} />
