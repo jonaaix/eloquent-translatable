@@ -223,14 +223,14 @@ trait ManagesPersistence
    }
 
    /**
-    * Fetches and returns a single translation value directly from the database.
+    * Fetches and returns a single translation record directly from the database.
     */
-   protected function fetchSingleTranslation(string $column, string $locale): ?string
+   protected function fetchSingleTranslation(string $column, string $locale): ?object
    {
       return $this->translationQuery()
          ->where($this->getTranslationForeignKey(), $this->getKey())
          ->where('column_name', $column)
          ->where('locale', $locale)
-         ->value('translation');
+         ->first(['translation']);
    }
 }

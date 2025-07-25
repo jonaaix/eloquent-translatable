@@ -36,29 +36,38 @@ trait HasTranslations
     */
    public function scopeWhereTranslation(Builder $query, string $column, mixed $value, ?string $locale = null): void
    {
+      $this->scopeWhereTranslationOperator($query, $column, '=', $value, $locale);
+   }
+
+   /**
+    * Scope a query to only include models that have a translation containing a substring.
+    */
+   public function scopeWhereTranslationLike(Builder $query, string $column, mixed $value, ?string $locale = null): void
+   {
+      $this->scopeWhereTranslationOperator($query, $column, 'LIKE', $value, $locale);
+   }
+
+   /**
+    * Centralized scope for querying translations with a specific operator.
+    */
+   private function scopeWhereTranslationOperator(
+      Builder $query,
+      string $column,
+      string $operator,
+      mixed $value,
+      ?string $locale
+   ): void {
       $locale = $locale ?? App::getLocale();
-      $translationTable = $this->getTranslationsTableName();
-      $modelTable = $this->getTable();
 
-      $isAlreadyJoined = collect($query->getQuery()->joins)
-         ->pluck('table')
-         ->contains($translationTable);
-
-      if (!$isAlreadyJoined) {
-         $query
-            ->join(
-               $translationTable,
-               $modelTable . '.' . $this->getKeyName(),
-               '=',
-               $translationTable . '.' . $this->getTranslationForeignKey(),
-            )
-            ->select($modelTable . '.*'); // Avoid column collisions
-      }
-
-      $query
-         ->where($translationTable . '.column_name', '=', $column)
-         ->where($translationTable . '.locale', '=', $locale)
-         ->where($translationTable . '.translation', '=', $value);
+      $query->whereExists(function ($subQuery) use ($column, $operator, $value, $locale) {
+         $subQuery
+            ->select(\DB::raw(1))
+            ->from($this->getTranslationsTableName())
+            ->whereColumn($this->getTranslationForeignKey(), $this->getQualifiedKeyName())
+            ->where('column_name', $column)
+            ->where('locale', $locale)
+            ->where('translation', $operator, $value);
+      });
    }
 
    public static function bootHasTranslations(): void
@@ -117,25 +126,20 @@ trait HasTranslations
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
       );
 
-      // First, check the fast-lookup cache for an already loaded translation.
-      if (array_key_exists($column, $this->structuredTranslations ?? [])) {
-         foreach ($localesToCheck as $currentLocale) {
-            if (array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
-               return $this->structuredTranslations[$column][$currentLocale];
-            }
+      foreach ($localesToCheck as $currentLocale) {
+         // First, check the fast-lookup cache for an already loaded translation.
+         if (isset($this->structuredTranslations[$column]) && array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
+            return $this->structuredTranslations[$column][$currentLocale];
          }
-      }
 
-      // If not in the cache, perform a targeted, single-value query for the first relevant locale.
-      if ($this->exists) {
-         $firstLocale = reset($localesToCheck);
-         if ($firstLocale) {
-            $translation = $this->fetchSingleTranslation($column, $firstLocale);
+         // If not in the cache, perform a targeted, single-value query.
+         if ($this->exists) {
+            $translation = $this->fetchSingleTranslation($column, $currentLocale);
 
-            // If found, cache it and return.
+            // A translation was found (even if it's NULL). Cache and return it.
             if ($translation !== null) {
-               $this->structuredTranslations[$column][$firstLocale] = $translation;
-               return $translation;
+               $this->structuredTranslations[$column][$currentLocale] = $translation->translation;
+               return $translation->translation;
             }
          }
       }
