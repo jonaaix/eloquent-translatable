@@ -30,6 +30,7 @@
 
       .hero__image {
          margin-bottom: 3rem;
+         max-height: 250px;
       }
 
       .table-of-contents__link--active {
