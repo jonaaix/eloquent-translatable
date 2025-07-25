@@ -45,11 +45,18 @@ trait HasTranslations
          ->contains($translationTable);
 
       if (!$isAlreadyJoined) {
-         $query->join($translationTable, $modelTable . '.' . $this->getKeyName(), '=', $translationTable . '.' . $this->getTranslationForeignKey())
+         $query
+            ->join(
+               $translationTable,
+               $modelTable . '.' . $this->getKeyName(),
+               '=',
+               $translationTable . '.' . $this->getTranslationForeignKey(),
+            )
             ->select($modelTable . '.*'); // Avoid column collisions
       }
 
-      $query->where($translationTable . '.column_name', '=', $column)
+      $query
+         ->where($translationTable . '.column_name', '=', $column)
          ->where($translationTable . '.locale', '=', $locale)
          ->where($translationTable . '.translation', '=', $value);
    }
@@ -89,14 +96,12 @@ trait HasTranslations
 
    protected function getTranslationModelName(): string
    {
-      return !empty($this->translationModel) ?
-         $this->translationModel : get_class($this) . 'Translation';
+      return !empty($this->translationModel) ? $this->translationModel : get_class($this) . 'Translation';
    }
 
    public function getTranslationsTableName(): string
    {
-      return !empty($this->translationTable) ?
-         $this->translationTable : Str::singular($this->getTable()) . '_translations';
+      return !empty($this->translationTable) ? $this->translationTable : Str::singular($this->getTable()) . '_translations';
    }
 
    protected function getTranslationForeignKey(): string

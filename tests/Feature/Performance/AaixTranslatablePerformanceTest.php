@@ -96,7 +96,7 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
    protected function createWithOneTranslation(): void
    {
       $product = new AaixProduct([
-         'name'        => 'Test',
+         'name' => 'Test',
          'description' => 'Test Description',
       ]);
 
@@ -109,7 +109,7 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
    protected function createWithAllTranslations(): void
    {
       $product = new AaixProduct([
-         'name'        => 'Test',
+         'name' => 'Test',
          'description' => 'Test Description',
       ]);
 

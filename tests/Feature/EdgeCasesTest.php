@@ -74,3 +74,57 @@ it('handles chaotic sequence of operations correctly', function () {
    assertDatabaseHas('test_model_translations', ['locale' => 'es', 'translation' => 'Spanish Name']);
    $this->assertEquals('Base Name', $model->getOriginal('name'));
 });
+
+it('uses a custom database connection if configured', function () {
+   // 1. Configure a secondary in-memory SQLite database for translations
+   config()->set('database.connections.testing_secondary', [
+      'driver' => 'sqlite',
+      'database' => ':memory:',
+      'prefix' => '',
+   ]);
+
+   // 2. Point the translatable package to the new connection
+   config()->set('translatable.database_connection', 'testing_secondary');
+
+   // 3. Manually run migrations on both connections to ensure a clean state.
+   $migrationPath = realpath(__DIR__ . '/../database/migrations/create_test_tables.php');
+
+   // Migrate the default 'testing' connection
+   \Illuminate\Support\Facades\Artisan::call('migrate', [
+      '--database' => 'testing',
+      '--path' => $migrationPath,
+      '--realpath' => true,
+   ]);
+
+   // Migrate the secondary 'testing_secondary' connection
+   \Illuminate\Support\Facades\Artisan::call('migrate', [
+      '--database' => 'testing_secondary',
+      '--path' => $migrationPath,
+      '--realpath' => true,
+   ]);
+
+   // 4. Create a model and a translation
+   $model = TestModel::create(['name' => 'Base Name']);
+   $model->setTranslation('name', 'de', 'German Name on Secondary DB')->save();
+
+   // 5. Assert the translation exists on the secondary connection
+   assertDatabaseHas(
+      'test_model_translations',
+      [
+         'translation' => 'German Name on Secondary DB',
+      ],
+      'testing_secondary',
+   );
+
+   // 6. Assert the translation does NOT exist on the default connection
+   assertDatabaseMissing(
+      'test_model_translations',
+      [
+         'translation' => 'German Name on Secondary DB',
+      ],
+      'testing',
+   );
+
+   // 7. Clean up config
+   config()->set('translatable.database_connection', null);
+});

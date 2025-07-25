@@ -143,7 +143,9 @@ abstract class BasePerformanceTest extends TestCase
       $memoryStr = round($memoryUsage, 2) . ' KB';
 
       if ($this->getDriverName() === self::BASELINE_DRIVER_NAME) {
-         $baselineResults = file_exists(self::BASELINE_RESULTS_FILE) ? json_decode(file_get_contents(self::BASELINE_RESULTS_FILE), true) : [];
+         $baselineResults = file_exists(self::BASELINE_RESULTS_FILE)
+            ? json_decode(file_get_contents(self::BASELINE_RESULTS_FILE), true)
+            : [];
          $baselineResults[$name] = ['duration' => $duration, 'memory' => $memoryUsage];
          file_put_contents(self::BASELINE_RESULTS_FILE, json_encode($baselineResults, JSON_PRETTY_PRINT));
       } else {
@@ -166,11 +168,13 @@ abstract class BasePerformanceTest extends TestCase
       }
 
       // Append result to the summary file for the final table
-      $summaryResults = file_exists(self::SUMMARY_RESULTS_FILE) ? json_decode(file_get_contents(self::SUMMARY_RESULTS_FILE), true) : [];
+      $summaryResults = file_exists(self::SUMMARY_RESULTS_FILE)
+         ? json_decode(file_get_contents(self::SUMMARY_RESULTS_FILE), true)
+         : [];
       $summaryResults[] = [
-         'driver'    => $this->getDriverName(),
+         'driver' => $this->getDriverName(),
          'test_name' => $name,
-         'duration'  => $duration,
+         'duration' => $duration,
       ];
       file_put_contents(self::SUMMARY_RESULTS_FILE, json_encode($summaryResults, JSON_PRETTY_PRINT));
 
@@ -179,7 +183,11 @@ abstract class BasePerformanceTest extends TestCase
 
       if (env('LOG_QUERIES', false) && !empty($queries)) {
          foreach ($queries as $query) {
-            $sql = \Illuminate\Support\Str::replaceArray('?', array_map(fn($b) => is_numeric($b) ? $b : "'{$b}'", $query['bindings']), $query['query']);
+            $sql = \Illuminate\Support\Str::replaceArray(
+               '?',
+               array_map(fn($b) => is_numeric($b) ? $b : "'{$b}'", $query['bindings']),
+               $query['query'],
+            );
             $this->output->writeln("<fg=gray>  └─ [{$query['time']}ms] {$sql}</>");
          }
       }

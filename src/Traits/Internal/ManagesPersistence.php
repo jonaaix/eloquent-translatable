@@ -4,6 +4,7 @@ namespace Aaix\EloquentTranslatable\Traits\Internal;
 
 use Aaix\EloquentTranslatable\Enums\Locale;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 trait ManagesPersistence
@@ -24,8 +25,8 @@ trait ManagesPersistence
       foreach ($this->stagedTranslations as $locale => $translationData) {
          foreach ($translationData as $key => $value) {
             $allStaged[] = [
-               $foreignKey    => $modelId,
-               'locale'      => $locale,
+               $foreignKey => $modelId,
+               'locale' => $locale,
                'column_name' => $key,
                'translation' => $value,
             ];
@@ -36,11 +37,7 @@ trait ManagesPersistence
          return;
       }
 
-      DB::table($this->getTranslationsTableName())->upsert(
-         $allStaged,
-         [$foreignKey, 'locale', 'column_name'],
-         ['translation'],
-      );
+      $this->translationQuery()->upsert($allStaged, [$foreignKey, 'locale', 'column_name'], ['translation']);
 
       // Clear staged translations and internal caches directly without a refresh.
       // The cache will be repopulated on the next read request if needed.
@@ -74,7 +71,7 @@ trait ManagesPersistence
       }
 
       // As a last resort, fetch translations via a fast, raw query.
-      $translations = DB::table($this->getTranslationsTableName())
+      $translations = $this->translationQuery()
          ->where($this->getTranslationForeignKey(), $this->getKey())
          ->get(['locale', 'column_name', 'translation']);
 
@@ -109,7 +106,8 @@ trait ManagesPersistence
       $foreignKey = $firstModel->getTranslationForeignKey();
       $modelIds = $collection->pluck($firstModel->getKeyName())->all();
 
-      $allTranslations = DB::table($firstModel->getTranslationsTableName())
+      $allTranslations = DB::connection($firstModel->getTranslationConnectionName())
+         ->table($firstModel->getTranslationsTableName())
          ->whereIn($foreignKey, $modelIds)
          ->get(['locale', 'column_name', 'translation', $foreignKey]);
 
@@ -140,11 +138,11 @@ trait ManagesPersistence
       $localeValue = $locale instanceof Locale ? $locale->value : $locale;
       $foreignKey = $this->getTranslationForeignKey();
 
-      DB::table($this->getTranslationsTableName())->upsert(
+      $this->translationQuery()->upsert(
          [
             [
-               $foreignKey    => $this->getKey(),
-               'locale'      => $localeValue,
+               $foreignKey => $this->getKey(),
+               'locale' => $localeValue,
                'column_name' => $key,
                'translation' => $value,
             ],
@@ -155,7 +153,6 @@ trait ManagesPersistence
 
       $this->updateLoadedTranslation($key, $localeValue, $value);
    }
-
 
    /**
     * Updates or adds a single translation to the in-memory cache without triggering a db read.
@@ -174,10 +171,7 @@ trait ManagesPersistence
          return;
       }
 
-      $translation = $this->translations
-         ->where('column_name', $key)
-         ->where('locale', $locale)
-         ->first();
+      $translation = $this->translations->where('column_name', $key)->where('locale', $locale)->first();
 
       if ($translation) {
          $translation->translation = $value;
@@ -185,7 +179,7 @@ trait ManagesPersistence
          $modelClass = $this->getTranslationModelName();
          if (class_exists($modelClass)) {
             $newTranslation = new $modelClass([
-               'locale'      => $locale,
+               'locale' => $locale,
                'column_name' => $key,
                'translation' => $value,
             ]);
@@ -204,11 +198,27 @@ trait ManagesPersistence
             return $locale instanceof Locale ? $locale->value : $locale;
          }, (array) $locales);
       }
-      $query = DB::table($this->getTranslationsTableName())->where($this->getTranslationForeignKey(), $this->getKey());
+      $query = $this->translationQuery()->where($this->getTranslationForeignKey(), $this->getKey());
       if ($locales) {
          $query->whereIn('locale', $locales);
       }
       $query->delete();
       $this->refreshTranslations();
+   }
+
+   /**
+    * Get the database connection name for translations.
+    */
+   protected function getTranslationConnectionName(): ?string
+   {
+      return config('translatable.database_connection');
+   }
+
+   /**
+    * Get a query builder instance for the translations table.
+    */
+   protected function translationQuery(): Builder
+   {
+      return DB::connection($this->getTranslationConnectionName())->table($this->getTranslationsTableName());
    }
 }

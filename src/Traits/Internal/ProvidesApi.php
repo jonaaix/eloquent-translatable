@@ -32,7 +32,7 @@ trait ProvidesApi
       $instance = new Translation();
       $instance->setTable($this->getTranslationsTableName());
 
-      $foreignKey = $this->getTranslationsTableName().'.'.$this->getTranslationForeignKey();
+      $foreignKey = $this->getTranslationsTableName() . '.' . $this->getTranslationForeignKey();
       $localKey = $this->getKeyName();
 
       return new HasMany($instance->newQuery(), $this, $foreignKey, $localKey);
