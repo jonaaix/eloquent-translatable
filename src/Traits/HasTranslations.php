@@ -113,12 +113,11 @@ trait HasTranslations
 
    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
    {
-      $this->ensureTranslationsAreLoaded();
-
       $localesToCheck = array_unique(
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
       );
 
+      // First, check the fast-lookup cache for an already loaded translation.
       if (array_key_exists($column, $this->structuredTranslations ?? [])) {
          foreach ($localesToCheck as $currentLocale) {
             if (array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
@@ -127,6 +126,21 @@ trait HasTranslations
          }
       }
 
+      // If not in the cache, perform a targeted, single-value query for the first relevant locale.
+      if ($this->exists) {
+         $firstLocale = reset($localesToCheck);
+         if ($firstLocale) {
+            $translation = $this->fetchSingleTranslation($column, $firstLocale);
+
+            // If found, cache it and return.
+            if ($translation !== null) {
+               $this->structuredTranslations[$column][$firstLocale] = $translation;
+               return $translation;
+            }
+         }
+      }
+
+      // If no translation is found anywhere, fall back to the original attribute.
       return $this->getOriginal($column);
    }
 

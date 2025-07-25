@@ -221,4 +221,16 @@ trait ManagesPersistence
    {
       return DB::connection($this->getTranslationConnectionName())->table($this->getTranslationsTableName());
    }
+
+   /**
+    * Fetches and returns a single translation value directly from the database.
+    */
+   protected function fetchSingleTranslation(string $column, string $locale): ?string
+   {
+      return $this->translationQuery()
+         ->where($this->getTranslationForeignKey(), $this->getKey())
+         ->where('column_name', $column)
+         ->where('locale', $locale)
+         ->value('translation');
+   }
 }
