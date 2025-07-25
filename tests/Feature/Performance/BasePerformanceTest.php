@@ -80,7 +80,13 @@ abstract class BasePerformanceTest extends TestCase
    public function it_measures_performance(): void
    {
       $randomId = random_int(1, $this->productCount);
-      $randomLocale = $this->locales[random_int(0, count($this->locales) - 1)];
+      // $randomLocale = $this->locales[random_int(0, count($this->locales) - 1)];
+      $randomLocale = 'nl';
+
+      // Create a fake read to warm up php
+      $this->getProduct($randomId);
+      $this->queryByName('Product 500 name de', 'de');
+      $this->eagerLoadProducts(50);
 
       $this->measure('Read: Access 1st Translation', function () use ($randomId, $randomLocale) {
          $product = $this->getProduct($randomId);
@@ -94,14 +100,19 @@ abstract class BasePerformanceTest extends TestCase
       $this->measure('Read: Eager Load 50 Products', function () {
          $this->eagerLoadProducts(50);
       });
+
+      $this->updateOneTranslation();
+      $this->createWithOneTranslation();
+      $this->createWithAllTranslations();
+
+      $this->measure('Write: Update 1 Translation', function () {
+         $this->updateOneTranslation();
+      });
       $this->measure('Write: Create + 1 Translation', function () {
          $this->createWithOneTranslation();
       });
       $this->measure('Write: Create + All Transl.', function () {
          $this->createWithAllTranslations();
-      });
-      $this->measure('Write: Update 1 Translation', function () {
-         $this->updateOneTranslation();
       });
    }
 
