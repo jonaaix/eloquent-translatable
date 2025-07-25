@@ -100,11 +100,7 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
          'description' => 'Test Description',
       ]);
 
-      // Stage the translation first
       $product->setTranslation('name', 'de', 'Test DE');
-
-      // Now save the model and the staged translation together.
-      // This triggers the highly optimized 'persistStagedTranslations' method.
       $product->save();
 
       $product->delete();
@@ -112,15 +108,19 @@ class AaixTranslatablePerformanceTest extends BasePerformanceTest
 
    protected function createWithAllTranslations(): void
    {
-      $product = AaixProduct::create([
-         'name' => 'Test',
+      $product = new AaixProduct([
+         'name'        => 'Test',
          'description' => 'Test Description',
       ]);
+
       $translations = [];
       foreach ($this->locales as $locale) {
          $translations[$locale] = "Test {$locale}";
       }
-      $product->storeTranslations('name', $translations);
+
+      $product->setTranslations('name', $translations);
+      $product->save();
+
       $product->delete();
    }
 
