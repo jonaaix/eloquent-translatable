@@ -29,7 +29,7 @@ const FeatureList = [
       img: require('@site/static/img/performance.png').default,
       description: (
          <>
-            Built for speed and scalability. By intentionally bypassing Eloquent's overhead for direct database queries, this
+            Built for speed and scalability. By partially bypassing Eloquent's overhead for direct database queries, this
             package delivers lightning-fast performance with minimal memory usage, even when handling millions of translations.
          </>
       ),
