@@ -19,13 +19,15 @@ High performance, developer-first translations for Laravel models.
 
 ---
 
-**Eloquent Translatable** is a Laravel package built for raw performance and a clean, focused developer experience. It uses direct, indexed database queries instead of relying on JSON columns or complex Eloquent model hydration, making it significantly faster and more memory-efficient than other solutions.
+**Eloquent Translatable** is a Laravel package built for raw performance and a clean, focused developer experience. It uses
+direct, indexed database queries instead of relying on JSON columns or complex Eloquent model hydration, making it significantly
+fast and memory-efficient.
 
 ## Key Features
 
-- **🚀 Performance-First:** Designed for speed at scale. No Eloquent overhead, no JSON parsing.
 - **✨ Intuitive API:** A clean, fluent, and predictable interface.
 - **🤝 Spatie-Compatible:** Optional API compatibility with `spatie/laravel-translatable`.
+- **🚀 Performance-First:** Designed for speed at scale. No Eloquent overhead, no JSON parsing.
 - **🔒 Secure by Default:** Explicitly define which attributes are translatable.
 - **⚙️ Artisan Command:** Scaffold translation migrations with a single command.
 - **🛡️ Enum-Powered:** Ships with a `Locale` enum for type-safe, readable code.
@@ -44,40 +46,40 @@ composer require aaix/eloquent-translatable
 
 ## Quick Example
 
-1.  **Prepare your model:**
+1. **Prepare your model:**
 
-    ```php
-    // app/Models/Product.php
-    namespace App\Models;
+   ```php
+   // app/Models/Product.php
+   namespace App\Models;
 
-    use Aaix\EloquentTranslatable\Traits\HasTranslations;
-    use Illuminate\Database\Eloquent\Model;
+   use Aaix\EloquentTranslatable\Traits\HasTranslations;
+   use Illuminate\Database\Eloquent\Model;
 
-    class Product extends Model
-    {
-        use HasTranslations;
+   class Product extends Model
+   {
+       use HasTranslations;
 
-        public array $translatable = ['name', 'description'];
-    }
-    ```
+       public array $translatable = ['name', 'description'];
+   }
+   ```
 
-2.  **Store and access translations:**
+2. **Store and access translations:**
 
-    ```php
-    use Aaix\EloquentTranslatable\Enums\Locale;
+   ```php
+   use Aaix\EloquentTranslatable\Enums\Locale;
 
-    $product = Product::create(['name' => 'My awesome product']);
+   $product = Product::create(['name' => 'My awesome product']);
 
-    // Store a translation
-    $product->storeTranslation('name', Locale::GERMAN, 'Mein tolles Produkt');
+   // Store a translation
+   $product->storeTranslation('name', Locale::GERMAN, 'Mein tolles Produkt');
 
-    // Access it (will fall back to the app's locale)
-    app()->setLocale('de');
-    echo $product->name; // Output: Mein tolles Produkt
+   // Access it (will fall back to the app's locale)
+   app()->setLocale('de');
+   echo $product->name; // Output: Mein tolles Produkt
 
-    // Or get a specific locale
-    echo $product->getTranslation('name', Locale::GERMAN); // Output: Mein tolles Produkt
-    ```
+   // Or get a specific locale
+   echo $product->getTranslation('name', Locale::GERMAN); // Output: Mein tolles Produkt
+   ```
 
 ## Testing
 

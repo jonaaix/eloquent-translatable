@@ -33,6 +33,11 @@
          max-height: 250px;
       }
 
+      .feature__image {
+         max-height: 120px;
+         margin-bottom: 2rem;
+      }
+
       .table-of-contents__link--active {
          color: var(--ifm-link-color);
       }
