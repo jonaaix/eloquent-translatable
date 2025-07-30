@@ -17,7 +17,7 @@ This guide will walk you through the installation and initial setup of the Eloqu
 2. Publish the configuration file (optional).
 
    ```bash
-   php artisan vendor:publish --provider="Aaix\EloquentTranslatable\TranslatableServiceProvider" --tag="translatable-config"
+   php artisan vendor:publish --provider="Aaix\EloquentTranslatable\EloquentTranslatableServiceProvider" --tag="translatable-config"
    ```
 
    This will create a `config/translatable.php` file where you can set a global fallback locale.
