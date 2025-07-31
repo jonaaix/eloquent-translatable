@@ -22,13 +22,16 @@ trait HasTranslations
    protected ?array $structuredTranslations = null;
 
    /*
-         PROPERTIES TO BE DEFINED ON THE MODEL:
-         =========================================
-         public array $translatable = [];
-         public array $allowJsonTranslationsFor = [];
-         protected ?string $translationModel = null;
-         protected ?string $translationTable = null;
-         protected ?string $translationForeignKey = null;
+      =========================================
+      PROPERTIES TO BE DEFINED ON THE MODEL:
+      =========================================
+      public array $translatable = [];
+      public array $allowJsonTranslationsFor = [];
+      protected ?string $spatieReadable = null;
+
+      protected ?string $translationModel = null;
+      protected ?string $translationTable = null;
+      protected ?string $translationForeignKey = null;
    */
 
    /**
