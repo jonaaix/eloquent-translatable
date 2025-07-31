@@ -17,14 +17,10 @@ By default, `aaix/eloquent-translatable` returns a `string` for the current loca
 
 To bridge this gap, you can use the `spatieReadable` property on your model. When you list a translatable attribute in this array, its read behavior changes to match Spatie's.
 
-### How It Works
-
 -   **Default Behavior**: `$model->name` returns a `string`.
 -   **Spatie Read Mode**: If `name` is in `$spatieReadable`, `$model->name` returns an `array` of all translations.
 
 ### Example Implementation
-
-To enable Spatie Read Mode for the `description` attribute, simply add it to the `$spatieReadable` array in your model.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -34,7 +30,6 @@ class Product extends Model
 {
     use HasTranslations;
 
-    // Define which attributes are translatable
     public array $translatable = ['name', 'description'];
 
     // Activate Spatie Read Mode for the 'description' attribute
@@ -49,21 +44,15 @@ Now, accessing these attributes will yield different results:
 ```php
 $product = Product::first();
 
-// 1. Standard string access
-// Returns the English translation or fallback
+// Standard string access
 echo $product->name; // Output: "My Product Name"
 
-// 2. Spatie-compatible array access
-// Returns an array of all translations for the description
+// Spatie-compatible array access
 print_r($product->description);
-// Output:
-// [
-//   'en' => 'My English Description',
-//   'de' => 'Meine deutsche Beschreibung'
-// ]
+// Output: ['en' => 'My English Description', 'de' => 'Meine deutsche Beschreibung']
 ```
 
 ### Important Trade-Offs
 
 -   **Performance**: Enabling this mode for an attribute means all its translations are loaded from the database upon access. This is less performant than the default behavior but necessary for compatibility.
--   **Read-Only Change**: This feature only affects **reading** attributes. The Spatie-compatible **writing** behavior (`$model->name = ['en' => '...']`) remains unaffected and works for all translatable attributes, regardless of whether they are in the `$spatieReadable` array.
+-   **Read-Only Change**: This feature only affects **reading** attributes. The Spatie-compatible **writing** behavior (`$model->name = ['en' => '...']`) remains unaffected and works for all translatable attributes.

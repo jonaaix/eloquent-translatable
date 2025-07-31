@@ -150,3 +150,55 @@ foreach ($products as $product) {
     echo $product->name;
 }
 ```
+
+## Getting All Translations as an Array
+
+For more direct control, especially in API development, you can use the `getTranslationsAsArray()` method. This is the most flexible way to get a structured array of translations.
+
+### Method Signature
+
+```php
+public function getTranslationsAsArray(string|array|null $columns = null): array
+```
+
+### Usage Examples
+
+#### 1. Get All Translations
+
+By default, the method returns all translations for all `$translatable` attributes.
+
+```php
+$translations = $product->getTranslationsAsArray();
+
+// Output:
+// [
+//   'name' => ['en' => 'Name', 'de' => 'Name'],
+//   'description' => ['en' => 'Description', 'de' => 'Beschreibung']
+// ]
+```
+
+#### 2. Get Translations for a Single Attribute
+
+Pass a string to get a single, flat array for one attribute.
+
+```php
+$nameTranslations = $product->getTranslationsAsArray('name');
+
+// Output:
+// ['en' => 'Name', 'de' => 'Name']
+```
+
+#### 3. Get Translations for Multiple Specific Attributes
+
+Pass an array to get a nested array for a subset of attributes.
+
+```php
+$subset = $product->getTranslationsAsArray(['name', 'description']);
+
+// Output:
+// [
+//   'name' => ['en' => 'Name', 'de' => 'Name'],
+//   'description' => ['en' => 'Description', 'de' => 'Beschreibung']
+// ]
+```
+```

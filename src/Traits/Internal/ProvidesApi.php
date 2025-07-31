@@ -146,4 +146,52 @@ trait ProvidesApi
       }
       return $this;
    }
+
+   public function getTranslationsAsArray(string|array|null $columns = null): array
+   {
+       $this->ensureTranslationsAreLoaded();
+
+       $originalColumns = $columns;
+
+       if ($columns === null) {
+           $columns = $this->translatable;
+       } elseif (is_string($columns)) {
+           $columns = [$columns];
+       }
+
+       $result = [];
+
+       foreach ($columns as $key) {
+           if (!$this->isTranslatableColumn($key)) {
+               continue;
+           }
+
+           $result[$key] = [];
+
+           // 1. Start with the fallback value.
+           $fallbackLocale = Config::get('translatable.fallback_locale');
+           $result[$key][$fallbackLocale] = $this->getOriginal($key);
+
+           // 2. Layer on the loaded translations from the database.
+           if (isset($this->structuredTranslations[$key])) {
+               foreach ($this->structuredTranslations[$key] as $locale => $value) {
+                   $result[$key][$locale] = $value;
+               }
+           }
+
+           // 3. Layer on the staged translations.
+           foreach ($this->stagedTranslations as $locale => $staged) {
+               if (isset($staged[$key])) {
+                   $result[$key][$locale] = $staged[$key];
+               }
+           }
+       }
+
+       // If the original request was for a single string attribute, return only that array.
+       if (is_string($originalColumns) && count($columns) === 1) {
+           return $result[$originalColumns] ?? [];
+       }
+
+       return $result;
+   }
 }
