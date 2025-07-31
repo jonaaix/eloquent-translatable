@@ -151,54 +151,37 @@ foreach ($products as $product) {
 }
 ```
 
-## Getting All Translations as an Array
+## Getting All Translations
 
-For more direct control, especially in API development, you can use the `getTranslationsAsArray()` method. This is the most flexible way to get a structured array of translations.
+To get an array of all available translations for an attribute, or for all translatable attributes, you can use the `getTranslations()` method, which is fully compatible with the `spatie/laravel-translatable` API.
 
-### Method Signature
+### Getting translations for a specific attribute
+
+Call `getTranslations()` with the attribute name to get a flat array of its translations.
 
 ```php
-public function getTranslationsAsArray(string|array|null $columns = null): array
+$product->getTranslations('name'); 
+// returns ['en' => 'Name in English', 'de' => 'Name in Deutsch']
 ```
 
-### Usage Examples
+### Getting all translations for the model
 
-#### 1. Get All Translations
-
-By default, the method returns all translations for all `$translatable` attributes.
+Call `getTranslations()` without any arguments to get a nested array of all translations for all translatable attributes.
 
 ```php
-$translations = $product->getTranslationsAsArray();
-
-// Output:
-// [
-//   'name' => ['en' => 'Name', 'de' => 'Name'],
-//   'description' => ['en' => 'Description', 'de' => 'Beschreibung']
+$product->getTranslations();
+// returns [
+//   'name' => ['en' => 'Name...', 'de' => 'Name...'],
+//   'description' => ['en' => 'Description...', 'de' => 'Beschreibung...']
 // ]
 ```
 
-#### 2. Get Translations for a Single Attribute
+### Filtering by locale
 
-Pass a string to get a single, flat array for one attribute.
-
-```php
-$nameTranslations = $product->getTranslationsAsArray('name');
-
-// Output:
-// ['en' => 'Name', 'de' => 'Name']
-```
-
-#### 3. Get Translations for Multiple Specific Attributes
-
-Pass an array to get a nested array for a subset of attributes.
+You can filter the results for specific locales by passing an array of locales as the second argument.
 
 ```php
-$subset = $product->getTranslationsAsArray(['name', 'description']);
-
-// Output:
-// [
-//   'name' => ['en' => 'Name', 'de' => 'Name'],
-//   'description' => ['en' => 'Description', 'de' => 'Beschreibung']
-// ]
+$product->getTranslations('name', ['en', 'fr']); 
+// returns ['en' => 'Name in English', 'fr' => 'Nom en français']
 ```
 ```

@@ -9,12 +9,7 @@ trait HandlesAttributeAccess
     */
    public function __get($key)
    {
-      // First, check if the attribute is meant to be read in Spatie-compatible mode.
-      if (property_exists($this, 'spatieReadable') && in_array($key, $this->spatieReadable, true)) {
-         return $this->getSpatieReadableTranslations($key);
-      }
-
-      // If not, check if the attribute is even meant to be translatable.
+      // First, check if the attribute is even meant to be translatable.
       // If not, do not interfere and let Eloquent handle it normally.
       // This is crucial for relationships (like ->variations) to work correctly.
       if (!$this->isTranslatableColumn($key)) {

@@ -44,63 +44,43 @@ it('accesses translation via persistent locale mode', function () {
    $this->assertEquals('Base Name', $model->name);
 });
 
-it('gets all translations as an array', function () {
-    $model = TestModel::create(['name' => 'Base Name']);
-    $model->setTranslation('name', 'de', 'German Name');
-    $model->setTranslation('name', 'fr', 'French Name');
+it('gets all translations when getTranslations is called without arguments', function () {
+   $model = TestModel::create(['name' => 'Base Name']);
+   $model->setTranslation('name', 'de', 'German Name');
 
-    $expected = [
-        'name' => [
-            config('translatable.fallback_locale') => 'Base Name',
-            'de' => 'German Name',
-            'fr' => 'French Name',
-        ],
-    ];
+   $expected = [
+      'name' => [
+         'en' => 'Base Name',
+         'de' => 'German Name',
+      ],
+   ];
 
-    $this->assertEquals($expected, $model->getTranslationsAsArray());
+   $this->assertEquals($expected, $model->getTranslations());
 });
 
-it('gets translations for a single attribute', function () {
-    $model = TestModel::create(['name' => 'Base Name']);
-    $model->setTranslation('name', 'de', 'German Name');
+it('gets all translations for a single attribute', function () {
+   $model = TestModel::create(['name' => 'Base Name']);
+   $model->setTranslation('name', 'de', 'German Name');
 
-    $expected = [
-        config('translatable.fallback_locale') => 'Base Name',
-        'de' => 'German Name',
-    ];
+   $expected = [
+      'en' => 'Base Name',
+      'de' => 'German Name',
+   ];
 
-    $this->assertEquals($expected, $model->getTranslationsAsArray('name'));
+   $this->assertEquals($expected, $model->getTranslations('name'));
 });
 
-it('gets translations for multiple attributes', function () {
-    $model = new class extends TestModel {
-        protected $table = 'test_models';
-        public array $translatable = ['name', 'description'];
-    };
+it('gets filtered translations for a single attribute', function () {
+   $model = TestModel::create(['name' => 'Base Name']);
+   $model->setTranslations('name', [
+      'de' => 'German Name',
+      'fr' => 'French Name',
+   ]);
 
-    $instance = $model->create([
-        'name' => 'Base Name',
-        'description' => 'Base Description',
-    ]);
+   $expected = [
+      'en' => 'Base Name',
+      'fr' => 'French Name',
+   ];
 
-    $instance->setTranslation('name', 'de', 'German Name');
-    $instance->setTranslation('description', 'de', 'German Description');
-
-    $expected = [
-        'name' => [
-            config('translatable.fallback_locale') => 'Base Name',
-            'de' => 'German Name',
-        ],
-        'description' => [
-            config('translatable.fallback_locale') => 'Base Description',
-            'de' => 'German Description',
-        ],
-    ];
-
-    $this->assertEquals($expected, $instance->getTranslationsAsArray(['name', 'description']));
-});
-
-it('returns an empty array for a non-translatable attribute', function () {
-    $model = TestModel::create(['name' => 'Base Name']);
-    $this->assertEquals([], $model->getTranslationsAsArray('non_translatable_attribute'));
+   $this->assertEquals($expected, $model->getTranslations('name', ['en', 'fr']));
 });
