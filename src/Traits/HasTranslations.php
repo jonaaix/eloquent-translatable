@@ -120,6 +120,36 @@ trait HasTranslations
          : Str::snake(class_basename($this)) . '_' . $this->getKeyName();
    }
 
+   protected function getSpatieReadableTranslations(string $key): array
+   {
+       $fallbackLocale = Config::get('translatable.fallback_locale');
+       $fallbackValue = $this->getOriginal($key);
+
+       // 1. Start with the base value from the parent model's column as the fallback.
+       $translations = [$fallbackLocale => $fallbackValue];
+
+       // 2. Layer on existing translations from the database.
+       $query = $this->translations()->where('column_name', $key);
+       if ($this->relationLoaded('translations')) {
+           $dbTranslations = $this->translations->where('column_name', $key);
+       } else {
+           $dbTranslations = $query->get();
+       }
+
+       foreach ($dbTranslations as $translation) {
+           $translations[$translation->locale] = $translation->translation;
+       }
+
+       // 3. Layer on any staged (unsaved) translations, as they are the most recent.
+       foreach ($this->stagedTranslations as $locale => $staged) {
+           if (array_key_exists($key, $staged)) {
+               $translations[$locale] = $staged[$key];
+           }
+       }
+
+       return $translations;
+   }
+
    protected function resolveTranslatedValue(string $column, ?string $locale): ?string
    {
       $localesToCheck = array_unique(
