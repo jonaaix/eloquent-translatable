@@ -123,7 +123,7 @@ trait HasTranslations
          : Str::snake(class_basename($this)) . '_' . $this->getKeyName();
    }
 
-   protected function resolveTranslatedValue(string $column, ?string $locale): mixed
+   protected function resolveTranslatedValue(string $column, ?string $locale): string|array|null
    {
       $localesToCheck = array_unique(
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
