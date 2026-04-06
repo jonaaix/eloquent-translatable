@@ -159,7 +159,7 @@ trait HasTranslations
          $value = $this->getOriginal($column);
       }
 
-      if ($value !== null && $this->isJsonTranslation($column)) {
+      if ($value !== null && is_string($value) && $this->isJsonTranslation($column)) {
          $decoded = json_decode($value, true);
          if (json_last_error() === JSON_ERROR_NONE) {
             return $decoded;
