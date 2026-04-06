@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name')->nullable();
             $table->string('description')->nullable();
+            $table->json('meta_keywords')->nullable();
             $table->timestamps();
          });
       }

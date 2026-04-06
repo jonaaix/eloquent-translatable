@@ -49,7 +49,7 @@ trait ProvidesApi
       return new TranslationProxy($this, $localeValue);
    }
 
-   public function getTranslation(string $column, string|Locale|null $locale = null): ?string
+   public function getTranslation(string $column, string|Locale|null $locale = null): string|array|null
    {
       $locale = $locale instanceof Locale ? $locale->value : $locale;
       return $this->resolveTranslatedValue($column, $locale);
@@ -128,10 +128,13 @@ trait ProvidesApi
       return $this;
    }
 
-   public function storeTranslation(string $key, string|Locale $locale, ?string $value): static
+   public function storeTranslation(string $key, string|Locale $locale, string|array|null $value): static
    {
       if (!$this->exists) {
          throw new RuntimeException('Cannot store a translation for a model that does not exist.');
+      }
+      if (is_array($value) && $this->isJsonTranslation($key)) {
+         $value = json_encode($value, JSON_THROW_ON_ERROR);
       }
       $this->persistTranslation($key, $locale, $value);
       return $this;

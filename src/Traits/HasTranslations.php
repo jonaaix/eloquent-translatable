@@ -123,16 +123,21 @@ trait HasTranslations
          : Str::snake(class_basename($this)) . '_' . $this->getKeyName();
    }
 
-   protected function resolveTranslatedValue(string $column, ?string $locale): ?string
+   protected function resolveTranslatedValue(string $column, ?string $locale): string|array|null
    {
       $localesToCheck = array_unique(
          array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
       );
 
+      $value = null;
+      $found = false;
+
       foreach ($localesToCheck as $currentLocale) {
          // First, check the fast-lookup cache for an already loaded translation.
          if (isset($this->structuredTranslations[$column]) && array_key_exists($currentLocale, $this->structuredTranslations[$column])) {
-            return $this->structuredTranslations[$column][$currentLocale];
+            $value = $this->structuredTranslations[$column][$currentLocale];
+            $found = true;
+            break;
          }
 
          // If not in the cache, perform a targeted, single-value query.
@@ -142,13 +147,26 @@ trait HasTranslations
             // A translation was found (even if it's NULL). Cache and return it.
             if ($translation !== null) {
                $this->structuredTranslations[$column][$currentLocale] = $translation->translation;
-               return $translation->translation;
+               $value = $translation->translation;
+               $found = true;
+               break;
             }
          }
       }
 
       // If no translation is found anywhere, fall back to the original attribute.
-      return $this->getOriginal($column);
+      if (!$found) {
+         $value = $this->getOriginal($column);
+      }
+
+      if ($value !== null && $this->isJsonTranslation($column)) {
+         $decoded = json_decode($value, true);
+         if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+         }
+      }
+
+      return $value;
    }
 
    protected function refreshTranslations(): void

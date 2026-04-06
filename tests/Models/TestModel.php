@@ -9,6 +9,7 @@ class TestModel extends Model
 {
    use HasTranslations;
 
-   public array $translatable = ['name'];
+   public array $translatable = ['name', 'meta_keywords'];
+   public array $allowJsonTranslationsFor = ['meta_keywords'];
    protected $guarded = [];
 }

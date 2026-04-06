@@ -16,15 +16,7 @@ trait HandlesAttributeAccess
          return parent::__get($key);
       }
 
-      $value = $this->resolveTranslatedValue($key, $this->getActiveLocale());
-
-      if ($this->isJsonTranslation($key)) {
-         if (is_string($value) && ($json = json_decode($value, true)) !== null) {
-            return $json;
-         }
-      }
-
-      return $value;
+      return $this->resolveTranslatedValue($key, $this->getActiveLocale());
    }
 
    /**

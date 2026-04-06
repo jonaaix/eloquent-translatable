@@ -53,6 +53,9 @@ it('gets all translations when getTranslations is called without arguments', fun
          'en' => 'Base Name',
          'de' => 'German Name',
       ],
+      'meta_keywords' => [
+         'en' => null,
+      ],
    ];
 
    $this->assertEquals($expected, $model->getTranslations());
