@@ -20,7 +20,7 @@ class TranslationProxy
    /**
     * Magic getter to retrieve a translation for the given key.
     */
-   public function __get(string $key): ?string
+   public function __get(string $key): string|array|null
    {
       return $this->model->getTranslation($key, $this->locale);
    }
