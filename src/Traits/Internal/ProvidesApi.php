@@ -43,7 +43,7 @@ trait ProvidesApi
       return $this;
    }
 
-   public function inLocale(string|Locale $locale)
+   public function inLocale(string|Locale $locale): TranslationProxy
    {
       $localeValue = $locale instanceof Locale ? $locale->value : $locale;
       return new TranslationProxy($this, $localeValue);
