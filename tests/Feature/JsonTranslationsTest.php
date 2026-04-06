@@ -36,6 +36,17 @@ it('returns JSON translations as arrays via attribute access', function () {
    expect($model->meta_keywords)->toBe(['keyword1', 'keyword2']);
 });
 
+it('returns decoded arrays from getTranslations() for JSON columns', function () {
+   $model = TestModel::create(['name' => 'Test']);
+   $model->storeTranslation('meta_keywords', 'de', ['keyword1', 'keyword2']);
+   $model->storeTranslation('meta_keywords', 'fr', ['motclé1']);
+
+   $result = $model->getTranslations('meta_keywords');
+
+   expect($result['de'])->toBe(['keyword1', 'keyword2']);
+   expect($result['fr'])->toBe(['motclé1']);
+});
+
 it('returns null for missing JSON translations', function () {
    $model = TestModel::create(['name' => 'Test']);
 

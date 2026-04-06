@@ -89,6 +89,18 @@ trait ProvidesApi
             $translations = array_intersect_key($translations, array_flip($allowedLocales));
          }
 
+         if ($this->isJsonTranslation($column)) {
+            $translations = array_map(function ($value) {
+               if (is_string($value)) {
+                  $decoded = json_decode($value, true);
+                  if (json_last_error() === JSON_ERROR_NONE) {
+                     return $decoded;
+                  }
+               }
+               return $value;
+            }, $translations);
+         }
+
          $results[$column] = $translations;
       }
 
