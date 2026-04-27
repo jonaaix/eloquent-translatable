@@ -126,7 +126,7 @@ trait HasTranslations
    protected function resolveTranslatedValue(string $column, ?string $locale): string|array|null
    {
       $localesToCheck = array_unique(
-         array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('translatable.fallback_locale')]),
+         array_filter([$locale, $this->getActiveLocale(), App::getLocale(), Config::get('eloquent-translatable.fallback_locale')]),
       );
 
       $value = null;

@@ -17,9 +17,9 @@ class EloquentTranslatableServiceProvider extends ServiceProvider
       if ($this->app->runningInConsole()) {
          $this->publishes(
             [
-               __DIR__ . '/../config/translatable.php' => config_path('translatable.php'),
+               __DIR__ . '/../config/eloquent-translatable.php' => config_path('eloquent-translatable.php'),
             ],
-            'translatable-config',
+            'eloquent-translatable-config',
          );
 
          $this->commands([MakeTranslationTableCommand::class]);

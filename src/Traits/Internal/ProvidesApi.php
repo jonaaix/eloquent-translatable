@@ -69,7 +69,7 @@ trait ProvidesApi
 
          $translations = [];
          // 1. Start with the fallback value.
-         $fallbackLocale = Config::get('translatable.fallback_locale');
+         $fallbackLocale = Config::get('eloquent-translatable.fallback_locale');
          $translations[$fallbackLocale] = $this->getOriginal($column);
 
          // 2. Layer on DB translations.

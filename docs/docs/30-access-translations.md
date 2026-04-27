@@ -16,7 +16,7 @@ When you access an attribute directly like `$product->name`, the trait tries to 
 
 1.  **Persistent Locale:** The locale set via `$model->setLocale()`.
 2.  **Application Locale:** The current locale of your Laravel app (`App::getLocale()`).
-3.  **Config Fallback Locale:** The locale defined in `config/translatable.php`.
+3.  **Config Fallback Locale:** The locale defined in `config/eloquent-translatable.php`.
 4.  **Original Attribute:** The value from the model's original database column.
 
 This ensures that a read access will always return the most relevant value available.

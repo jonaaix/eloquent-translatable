@@ -211,7 +211,7 @@ trait ManagesPersistence
     */
    protected function getTranslationConnectionName(): ?string
    {
-      return config('translatable.database_connection');
+      return config('eloquent-translatable.database_connection');
    }
 
    /**

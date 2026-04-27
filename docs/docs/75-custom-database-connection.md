@@ -31,10 +31,10 @@ First, define a new database connection in your `config/database.php` file. For 
 ],
 ```
 
-Next, instruct the package to use this new connection by setting the `database_connection` option in `config/translatable.php`.
+Next, instruct the package to use this new connection by setting the `database_connection` option in `config/eloquent-translatable.php`.
 
 ```php
-// config/translatable.php
+// config/eloquent-translatable.php
 
 return [
     // ... other options
