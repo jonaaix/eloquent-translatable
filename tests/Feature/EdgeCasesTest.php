@@ -84,7 +84,7 @@ it('uses a custom database connection if configured', function () {
    ]);
 
    // 2. Point the translatable package to the new connection
-   config()->set('translatable.database_connection', 'testing_secondary');
+   config()->set('eloquent-translatable.database_connection', 'testing_secondary');
 
    // 3. Manually run migrations on both connections to ensure a clean state.
    $migrationPath = realpath(__DIR__ . '/../database/migrations/create_test_tables.php');
@@ -126,5 +126,5 @@ it('uses a custom database connection if configured', function () {
    );
 
    // 7. Clean up config
-   config()->set('translatable.database_connection', null);
+   config()->set('eloquent-translatable.database_connection', null);
 });

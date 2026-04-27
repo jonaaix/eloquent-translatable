@@ -16,7 +16,7 @@ it('prioritizes persistent locale over app locale and config fallback', function
       ])
       ->save();
 
-   config(['translatable.fallback_locale' => 'fr']);
+   config(['eloquent-translatable.fallback_locale' => 'fr']);
    app()->setLocale('fr');
    $model->setLocale('de');
 
@@ -32,7 +32,7 @@ it('prioritizes app locale over config fallback', function () {
       ])
       ->save();
 
-   config(['translatable.fallback_locale' => 'de']);
+   config(['eloquent-translatable.fallback_locale' => 'de']);
    app()->setLocale('fr');
 
    $this->assertEquals('French Name', $model->name);
@@ -46,7 +46,7 @@ it('uses config fallback when app locale translation is missing', function () {
       ])
       ->save();
 
-   config(['translatable.fallback_locale' => 'de']);
+   config(['eloquent-translatable.fallback_locale' => 'de']);
    app()->setLocale('fr'); // French translation does not exist
 
    $this->assertEquals('German Name', $model->name);
@@ -56,7 +56,7 @@ it('falls back to original attribute when no other translation is available', fu
    $model = TestModel::create(['name' => 'Base Name']);
    $model->setTranslation('name', 'de', 'German Name')->save();
 
-   config(['translatable.fallback_locale' => 'es']); // Spanish does not exist
+   config(['eloquent-translatable.fallback_locale' => 'es']); // Spanish does not exist
    app()->setLocale('fr'); // French does not exist
 
    $this->assertEquals('Base Name', $model->name);
