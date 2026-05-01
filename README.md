@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/jonaaix/eloquent-translatable">
-    <img src="https://raw.githubusercontent.com/jonaaix/eloquent-translatable/main/docs/static/img/logo2.png" alt="Laravel Eloquent Translatable Logo" width="200">
+    <img src="https://jonaaix.github.io/eloquent-translatable/img/logo2.png" alt="Laravel Eloquent Translatable Logo" width="200">
   </a>
 </p>
 
