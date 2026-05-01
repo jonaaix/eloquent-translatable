@@ -2,7 +2,7 @@
 # You should disable port-exposure in production!
 
 volumes:
-    claude_session:
+    claude_home:
 
 services:
     # docker compose exec -it php_ai claude
@@ -12,7 +12,7 @@ services:
         stop_grace_period: 60s
         volumes:
             - ./:/app
-            - claude_session:/home/laravel/.claude
+            - claude_home:/home/laravel
         environment:
             ENV_DEV: true
             SKIP_LARAVEL_BOOT: true
